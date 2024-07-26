@@ -1,0 +1,2771 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report MustUnderstand="df" xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner" xmlns:df="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition/defaultfontfamily">
+  <df:DefaultFontFamily>Segoe UI</df:DefaultFontFamily>
+  <AutoRefresh>0</AutoRefresh>
+  <DataSources>
+    <DataSource Name="davis">
+      <ConnectionProperties>
+        <DataProvider>SQL</DataProvider>
+        <ConnectString>Data Source=172.0.100.26;Initial Catalog=accelaconv1</ConnectString>
+        <Prompt>Specify a user name and password for data source davis:</Prompt>
+      </ConnectionProperties>
+      <rd:SecurityType>DataBase</rd:SecurityType>
+      <rd:DataSourceID>f1168592-b701-4b6e-ae25-817ddbd80371</rd:DataSourceID>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="address_info">
+      <Query>
+        <DataSourceName>davis</DataSourceName>
+        <QueryParameters>
+          <QueryParameter Name="@inspection_id">
+            <Value>=Parameters!inspection_id.Value</Value>
+          </QueryParameter>
+        </QueryParameters>
+        <CommandText>---- Food Notice Report (https://redmine.scubeenterprise.com/issues/19509)
+-----------------------------------------
+---- Description: Food Notice Report - address_info
+---- Version:1.0
+-----------------------------------------
+---- Created: 2024-07-12 - js - Notes
+---- Modified: 2024-07-12 - js - Notes
+-- 
+-----------------------------------------
+---- Development Code
+---- DECLARE Statements below this
+--DECLARE @inspection_id int;
+-- 
+---- SET Statements below this
+--set @inspection_id = 13098;
+-- 
+-----------------------------------------
+----Main SQL below this
+
+
+select
+	b.B1_CHECKLIST_COMMENT as [name of establishment?] --5
+	,coalesce(o.B1_FULL_NAME,'Establishment Owner') as owner_name		   --9,10
+	,addr.B1_HSE_NBR_START as bldg_number --9,12
+	,addr.B1_STR_DIR as street_direction	   --9,12
+	,addr.b1_str_name as street_name	   --9,12
+	,addr.b1_unit_type as unit_type 	   --9,12
+	,addr.B1_UNIT_START as unit_number	   --9,12
+	,addr.B1_SITUS_CITY as city	   --9,12
+	,addr.B1_SITUS_STATE as state  --9,12
+	,addr.B1_SITUS_ZIP as zip	   --9,12
+	,trim(
+		coalesce(     convert(varchar,addr.B1_HSE_NBR_START),'')
+		+coalesce(' '+convert(varchar,addr.B1_STR_DIR      ),'')
+		+coalesce(' '+convert(varchar,addr.b1_str_name     ),'')
+		+coalesce(' '+convert(varchar,addr.b1_unit_type    ),'')
+		+coalesce(' '+convert(varchar,addr.B1_UNIT_START   ),'')
+	) as address_line1
+from G6ACTION a --on concat(i.b1_per_id1,i.b1_per_id2,i.b1_per_id3) = concat(a.b1_per_id1,a.b1_per_id2,a.b1_per_id3)
+left join BCHCKBOX b on b.serv_prov_code = a.serv_prov_code and concat(b.b1_per_id1,b.b1_per_id2,b.b1_per_id3) = concat(a.b1_per_id1,a.b1_per_id2,a.b1_per_id3) and b.B1_CHECKBOX_DESC_ALIAS = 'Name of Establishment?'
+left join B3CONTACT o on o.serv_prov_code = a.serv_prov_code and concat(o.b1_per_id1,o.b1_per_id2,o.b1_per_id3) = concat(a.b1_per_id1,a.b1_per_id2,a.b1_per_id3) and o.B1_CONTACT_TYPE = 'Establishment Owner'
+left join B3ADDRES addr on addr.serv_prov_code = a.serv_prov_code and concat(addr.b1_per_id1,addr.b1_per_id2,addr.b1_per_id3) = concat(a.b1_per_id1,a.b1_per_id2,a.b1_per_id3)
+where
+	1=1
+	and a.serv_prov_code = 'DAVISCO'
+	and a.g6_act_num = @inspection_id
+;</CommandText>
+        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
+      </Query>
+      <Fields>
+        <Field Name="name_of_establishment_">
+          <DataField>name of establishment?</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="owner_name">
+          <DataField>owner_name</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="bldg_number">
+          <DataField>bldg_number</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="street_direction">
+          <DataField>street_direction</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="street_name">
+          <DataField>street_name</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="unit_type">
+          <DataField>unit_type</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="unit_number">
+          <DataField>unit_number</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="city">
+          <DataField>city</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="state">
+          <DataField>state</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="zip">
+          <DataField>zip</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="address_line1">
+          <DataField>address_line1</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="inspection_info">
+      <Query>
+        <DataSourceName>davis</DataSourceName>
+        <QueryParameters>
+          <QueryParameter Name="@inspection_id">
+            <Value>=Parameters!inspection_id.Value</Value>
+          </QueryParameter>
+        </QueryParameters>
+        <CommandText>use accelaconv1 
+-- Food Notice Report (https://redmine.scubeenterprise.com/issues/19509)
+---------------------------------------
+-- Description: Food Notice Report (https://redmine.scubeenterprise.com/issues/19509)
+-- Version:1.0
+---------------------------------------
+-- Created: 2024-07-12 - js - Notes
+-- Modified: 2024-07-12 - js - Notes
+ 
+---------------------------------------
+------ Development Code
+------ DECLARE Statements below this
+--DECLARE @inspection_id int;
+--
+------ SET Statements below this
+--set @inspection_id = 13098;
+---------------------------------------
+--Main SQL below this
+
+;with isCos_isRpt as (
+	select
+		gi.GUIDE_ITEM_SEQ_NBR
+		,max(case when asitv.asitab_name = 'COS' and asitv.ATTRIBUTE_VALUE = 'CHECKED' then 1 else 0 end) as isCos
+		,max(case when asitv.asitab_name = 'RPT' and asitv.ATTRIBUTE_VALUE = 'CHECKED' then 1 else 0 end) as isRpt
+	from G6ACTION a
+	join b1permit b on b.SERV_PROV_CODE = a.SERV_PROV_CODE and concat(b.b1_per_id1,b.b1_per_id2,b.b1_per_id3) = concat(a.b1_per_id1,a.b1_per_id2,a.b1_per_id3)
+	join GGUIDESHEET g on g.SERV_PROV_CODE = a.SERV_PROV_CODE and concat(g.b1_per_id1,g.b1_per_id2,g.b1_per_id3) = concat(a.b1_per_id1,a.b1_per_id2,a.b1_per_id3) and g.G6_ACT_NUM = a.g6_act_num
+	join gguidesheet_item gi on gi.SERV_PROV_CODE = a.SERV_PROV_CODE and gi.GUIDESHEET_SEQ_NBR = g.GUIDESHEET_SEQ_NBR
+	join GGDSHEET_ITEM_ASITAB_VALUE asitv on asitv.SERV_PROV_CODE = a.SERV_PROV_CODE and asitv.GUIDESHEET_SEQ_NBR = g.GUIDESHEET_SEQ_NBR and asitv.GUIDEITEM_SEQ_NBR = gi.GUIDE_ITEM_SEQ_NBR
+	where
+		1=1
+		and a.SERV_PROV_CODE = 'DAVISCO'
+		and a.g6_act_num = @inspection_id
+		and ASITAB_SUBGRP_NAM = 'FOOD CHECKLIST'
+		and ASITAB_NAME in ('COS','RPT')
+	group by gi.GUIDE_ITEM_SEQ_NBR
+)
+select 
+	i.G6_ACT_TYP as inspection_type
+	,case 
+		when try_convert(int,left(gi.guide_item_text,2)) is not null 
+		then case 
+			--This is based on the spec sheet. I compared the configured checklist for converted items to the checklist in nonprod1. 
+			-- Converted counts headers; nonprod1 does not appear to count headers in backend as checklist items.
+			--Therefore these conditions are based on the checklist items appearing with leading digits, ie '01) blah'.
+			when convert(int,left(gi.guide_item_text,2)) between 1 and 56 then 'Utah Administrative Code, Rule R392-100. Food Service Sanitation.'
+			when convert(int,left(gi.guide_item_text,2)) between 57 and 57 then 'Utah Administrative Code, Rule R392-103. Food Handler Training and Certificate.'
+			when convert(int,left(gi.guide_item_text,2)) between 58 and 60 then 'Other Applicable Rules'
+			else null
+			end
+		else case 
+			--This is based on the sandbox. I compared the configured checklist for converted items to the checklist in nonprod1. 
+			-- Converted counts headers; nonprod1 does not appear to count headers in backend as checklist items.
+			when gi.GUIDE_ITEM_DISPLAY_ORDER between 1 and 74 then 'Utah Administrative Code, Rule R392-100. Food Service Sanitation.'
+			when gi.GUIDE_ITEM_DISPLAY_ORDER between 76 and 76 then 'Utah Administrative Code, Rule R392-103. Food Handler Training and Certificate.'
+			when gi.GUIDE_ITEM_DISPLAY_ORDER &gt;= 77 then 'Other Applicable Rules'
+			else null
+			end
+		end
+		as cat
+	,gi.GUIDE_ITEM_DISPLAY_ORDER
+	,gi.GUIDE_ITEM_COMMENT
+	,'('+convert(varchar(100),row_number() OVER (PARTITION BY 
+		case 
+		when try_convert(int,left(gi.guide_item_text,2)) is not null 
+		then case 
+			when convert(int,left(gi.guide_item_text,2)) between 1 and 56 then 'Utah Administrative Code, Rule R392-100. Food Service Sanitation.'
+			when convert(int,left(gi.guide_item_text,2)) between 57 and 57 then 'Utah Administrative Code, Rule R392-103. Food Handler Training and Certificate.'
+			when convert(int,left(gi.guide_item_text,2)) between 58 and 60 then 'Other Applicable Rules'
+			else null
+			end
+		else case 
+			when gi.GUIDE_ITEM_DISPLAY_ORDER between 1 and 74 then 'Utah Administrative Code, Rule R392-100. Food Service Sanitation.'
+			when gi.GUIDE_ITEM_DISPLAY_ORDER between 76 and 76 then 'Utah Administrative Code, Rule R392-103. Food Handler Training and Certificate.'
+			when gi.GUIDE_ITEM_DISPLAY_ORDER &gt;= 77 then 'Other Applicable Rules'
+			else null
+			end
+		end
+		ORDER BY gi.guide_item_seq_nbr asc))+')' AS Rank
+	,coalesce(isCos_isRpt.isCos,0) as isCos
+	,coalesce(isCos_isRpt.isRpt,0) as isRpt
+from GGUIDESHEET a
+join GGUIDESHEET_ITEM gi on gi.SERV_PROV_CODE = a.SERV_PROV_CODE and gi.GUIDESHEET_SEQ_NBR = a.GUIDESHEET_SEQ_NBR
+join G6ACTION i on i.SERV_PROV_CODE = a.SERV_PROV_CODE and i.g6_act_num = a.G6_ACT_NUM
+left join isCos_isRpt on isCos_isRpt.GUIDE_ITEM_SEQ_NBR = gi.GUIDE_ITEM_SEQ_NBR	
+where
+	1=1
+	and a.serv_prov_code = 'DAVISCO'
+	and a.G6_ACT_NUM = @inspection_id
+	and gi.guide_type = 'Food Establishment Inspection Checklist'
+	and gi.GUIDE_ITEM_COMMENT is not null
+order by gi.GUIDE_ITEM_DISPLAY_ORDER
+;</CommandText>
+        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
+      </Query>
+      <Fields>
+        <Field Name="inspection_type">
+          <DataField>inspection_type</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="cat">
+          <DataField>cat</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="GUIDE_ITEM_DISPLAY_ORDER">
+          <DataField>GUIDE_ITEM_DISPLAY_ORDER</DataField>
+          <rd:TypeName>System.Int16</rd:TypeName>
+        </Field>
+        <Field Name="GUIDE_ITEM_COMMENT">
+          <DataField>GUIDE_ITEM_COMMENT</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Rank">
+          <DataField>Rank</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="isCos">
+          <DataField>isCos</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="isRpt">
+          <DataField>isRpt</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="inspector_list">
+      <Query>
+        <DataSourceName>davis</DataSourceName>
+        <QueryParameters>
+          <QueryParameter Name="@user_id">
+            <Value>=Parameters!user_id.Value</Value>
+          </QueryParameter>
+        </QueryParameters>
+        <CommandText>---- ReportName (https://redmine.scubeenterprise.com/issues/19509)
+-----------------------------------------
+---- Description: Food Notice Report - inspector_list
+---- Version:1.0
+-----------------------------------------
+---- Created:2024-07-17 - js - inspector_list -- This query is used to populate the parameter dropdown "user_name". Therefore it must use &amp;user_id to match the existing user. Is this problematic?
+---- Modified: 2024-07-17 - js - Notes
+--
+---------------------------------------
+---- Development Code
+---- DECLARE Statements below this
+--declare @user_id varchar(100); 
+--
+---- SET Statements below this
+--set @user_id = 'joelstewart'
+-- 
+-----------------------------------------
+----Main SQL below this
+
+select
+	inspector_name
+	,inspector_title
+	,inspector_email
+from (
+	select 
+		trim(replace(isnull(ga_fname,'')+' '+isnull(ga_lname,''),'  ',' ')) as inspector_name
+		,GA_TITLE inspector_title
+		,GA_EMAIL inspector_email
+	from G3STAFFS
+	where
+		1=1
+		and SERV_PROV_CODE = 'DAVISCO'
+		and GA_BUREAU_CODE in ('INSPECT','ADMIN')
+		and REC_STATUS = 'A'
+	union
+	select 
+		@user_id
+		,'' as title
+		,'' as email
+) a
+order by case when inspector_name = @user_id then 1 else 2 end,1
+;</CommandText>
+        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
+      </Query>
+      <Fields>
+        <Field Name="inspector_name">
+          <DataField>inspector_name</DataField>
+          <rd:TypeName>System.Object</rd:TypeName>
+        </Field>
+        <Field Name="inspector_title">
+          <DataField>inspector_title</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="inspector_email">
+          <DataField>inspector_email</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="manager_names">
+      <Query>
+        <DataSourceName>davis</DataSourceName>
+        <CommandText>---- ReportName (https://redmine.scubeenterprise.com/issues/19509)
+-----------------------------------------
+---- Description: Food Notice Report - manager_names
+---- Version:1.0
+-----------------------------------------
+---- Created:2024-07-17 - js - Notes
+---- Modified: 2024-07-17 - js - Notes
+ 
+---------------------------------------
+---- Development Code
+---- DECLARE Statements below this
+--declare @user_name varchar(100)
+--,@default_employee_title varchar(100)
+--;
+ 
+---- SET Statements below this
+--set @user_name = 'joelstewart'
+--set @user_name = 'joelstewart'
+--set @default_employee_title  = 'Database Analyst'
+--;
+
+---------------------------------------
+----Main SQL below this
+
+
+;with a as (
+	select 
+		(ga_fname + ' ' + ga_lname) as manager_name 
+		,ga_title manager_title
+	from G3STAFFS 
+	where 
+		1=1
+		and serv_prov_code = 'DAVISCO' 
+		and ga_title like '%manager%'
+	union
+
+	select '',''
+)
+select
+	manager_name
+	,manager_title
+from a 
+order by case when manager_name = '' then 1 else 2 end
+;</CommandText>
+        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
+      </Query>
+      <Fields>
+        <Field Name="manager_name">
+          <DataField>manager_name</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="manager_title">
+          <DataField>manager_title</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="logo">
+      <Query>
+        <DataSourceName>davis</DataSourceName>
+        <CommandText>select
+	LOGO_CONTENT
+from RSERV_LOGO logo
+where
+	1=1
+	and logo.SERV_PROV_CODE = 'DAVISCO'
+	and logo.LOGO_TYPE = 'AGENCY_LOGO_SSRS'
+;</CommandText>
+        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
+      </Query>
+      <Fields>
+        <Field Name="LOGO_CONTENT">
+          <DataField>LOGO_CONTENT</DataField>
+          <rd:TypeName>System.Byte[]</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="physical_mailing_url__header">
+      <Query>
+        <DataSourceName>davis</DataSourceName>
+        <CommandText>/*
+physical address
+mailing address
+url
+*/
+--physical address 
+select
+	'physical address' as [key]
+	,value_desc as [value]
+from RBIZDOMAIN_VALUE logo
+where
+	1=1
+	and SERV_PROV_CODE = 'DAVISCO'
+	and BIZDOMAIN = 'rpt_config'
+	and BIZDOMAIN_VALUE = 'Report_PhysicialAddr'
+
+union
+
+select
+	'physical_address' as [key]
+	,'22 S State Street, Clearfield, UT 84015' as [value]
+where not exists (
+	select 1
+	from RBIZDOMAIN_VALUE logo
+	where
+		1=1
+		and SERV_PROV_CODE = 'DAVISCO'
+		and BIZDOMAIN = 'rpt_config'
+		and BIZDOMAIN_VALUE = 'Report_PhysicialAddr'
+)
+union
+--mailing address
+select
+	'mailing_address' as [key]
+	,value_desc as [value]
+from RBIZDOMAIN_VALUE logo
+where
+	1=1
+	and SERV_PROV_CODE = 'DAVISCO'
+	and BIZDOMAIN = 'rpt_config'
+	and BIZDOMAIN_VALUE = 'Report_MailingAddr'
+
+union
+
+select
+	'mailing_address' as [key]
+	,'PO Box 618, Farmington, UT 84025' as [value]
+where not exists (
+	select 1
+	from RBIZDOMAIN_VALUE logo
+	where
+		1=1
+		and SERV_PROV_CODE = 'DAVISCO'
+		and BIZDOMAIN = 'rpt_config'
+		and BIZDOMAIN_VALUE = 'Report_MailingAddr'
+)
+union
+--url
+select
+	'url' as [key]
+	,value_desc as [value]
+from RBIZDOMAIN_VALUE logo
+where
+	1=1
+	and SERV_PROV_CODE = 'DAVISCO'
+	and BIZDOMAIN = 'rpt_config'
+	and BIZDOMAIN_VALUE = 'Report_Email'
+
+union
+
+select
+	'url' as [key]
+	,'daviscountyutah.gov/health' as [value]
+where not exists (
+	select 1
+	from RBIZDOMAIN_VALUE logo
+	where
+		1=1
+		and SERV_PROV_CODE = 'DAVISCO'
+		and BIZDOMAIN = 'rpt_config'
+		and BIZDOMAIN_VALUE = 'Report_Email'
+)</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="key">
+          <DataField>key</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="value">
+          <DataField>value</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <ReportSections>
+    <ReportSection>
+      <Body>
+        <ReportItems>
+          <Textbox Name="ReportTitle">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>Physical: </Value>
+                    <Style>
+                      <FontStyle>Normal</FontStyle>
+                      <FontFamily>Arial Narrow</FontFamily>
+                      <FontWeight>Normal</FontWeight>
+                      <TextDecoration>None</TextDecoration>
+                      <Color>#a09c98</Color>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Label>physical_address</Label>
+                    <Value>=Lookup("physical_address", Fields!key.Value, Fields!value.Value, "physical_mailing_url__header")</Value>
+                    <Style>
+                      <FontStyle>Normal</FontStyle>
+                      <FontFamily>Arial Narrow</FontFamily>
+                      <FontWeight>Normal</FontWeight>
+                      <TextDecoration>None</TextDecoration>
+                      <Color>#a09c98</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Right</TextAlign>
+                </Style>
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>Mailing: </Value>
+                    <Style>
+                      <FontStyle>Normal</FontStyle>
+                      <FontFamily>Arial Narrow</FontFamily>
+                      <FontWeight>Normal</FontWeight>
+                      <TextDecoration>None</TextDecoration>
+                      <Color>#a09c98</Color>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Label>mailing_address</Label>
+                    <Value>=Lookup("mailing_address", Fields!key.Value, Fields!value.Value, "physical_mailing_url__header")</Value>
+                    <Style>
+                      <FontStyle>Normal</FontStyle>
+                      <FontFamily>Arial Narrow</FontFamily>
+                      <FontWeight>Normal</FontWeight>
+                      <TextDecoration>None</TextDecoration>
+                      <Color>#a09c98</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Right</TextAlign>
+                </Style>
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Label>url</Label>
+                    <Value>=Lookup("url", Fields!key.Value, Fields!value.Value, "physical_mailing_url__header")</Value>
+                    <Style>
+                      <FontStyle>Normal</FontStyle>
+                      <FontFamily>Arial Narrow</FontFamily>
+                      <FontWeight>Normal</FontWeight>
+                      <TextDecoration>None</TextDecoration>
+                      <Color>#a09c98</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Right</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <rd:WatermarkTextbox>Title</rd:WatermarkTextbox>
+            <rd:DefaultName>ReportTitle</rd:DefaultName>
+            <Left>3.34717in</Left>
+            <Height>0.625in</Height>
+            <Width>3.22218in</Width>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Line Name="Line1">
+            <Top>0.625in</Top>
+            <Left>3.97768in</Left>
+            <Height>0in</Height>
+            <Width>2.59167in</Width>
+            <ZIndex>1</ZIndex>
+            <Style>
+              <Border>
+                <Color>#0076bd</Color>
+                <Style>Solid</Style>
+                <Width>2pt</Width>
+              </Border>
+            </Style>
+          </Line>
+          <Textbox Name="text_box_top_info">
+            <CanGrow>true</CanGrow>
+            <CanShrink>true</CanShrink>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>18pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>=Globals!ExecutionTime</Value>
+                    <Style>
+                      <FontSize>12pt</FontSize>
+                      <Format>MMMM d, yyyy</Format>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>12pt</FontSize>
+                      <Format>MMMM d, yyyy</Format>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>NOTICE</Value>
+                    <Style>
+                      <FontSize>18pt</FontSize>
+                      <Format>MMMM d, yyyy</Format>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>12pt</FontSize>
+                      <Format>MMMM d, yyyy</Format>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>=Parameters!delivery_method.Value</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                      <Format>MMMM d, yyyy</Format>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                      <Format>MMMM d, yyyy</Format>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <Top>0.63889in</Top>
+            <Left>0.06945in</Left>
+            <Height>2.12145in</Height>
+            <Width>6.4999in</Width>
+            <ZIndex>2</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="text_box_address_info_1">
+            <CanGrow>true</CanGrow>
+            <CanShrink>true</CanShrink>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Label>name_of_establishment_</Label>
+                    <Value>=First(Fields!name_of_establishment_.Value, "address_info")</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <Top>2.76034in</Top>
+            <Left>0.06945in</Left>
+            <Height>0.24722in</Height>
+            <Width>6.4999in</Width>
+            <ZIndex>3</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="text_box_address_info_2">
+            <CanGrow>true</CanGrow>
+            <CanShrink>true</CanShrink>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>ATTN: </Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Label>owner_name</Label>
+                    <Value>=first(Fields!owner_name.Value,"address_info")</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <Top>3.00756in</Top>
+            <Left>0.06945in</Left>
+            <Height>0.25557in</Height>
+            <Width>6.4999in</Width>
+            <ZIndex>4</ZIndex>
+            <Visibility>
+              <Hidden>=IIf(IsNothing(First(Fields!owner_name.Value,"address_info")), True, False)</Hidden>
+            </Visibility>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="text_box_address_info_3">
+            <CanGrow>true</CanGrow>
+            <CanShrink>true</CanShrink>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Label>address_line1</Label>
+                    <Value>=First(Fields!address_line1.Value, "address_info")</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <Top>3.26313in</Top>
+            <Left>0.06945in</Left>
+            <Height>0.30834in</Height>
+            <Width>6.4999in</Width>
+            <ZIndex>5</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="text_box_address_info_4">
+            <CanGrow>true</CanGrow>
+            <CanShrink>true</CanShrink>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Label>city</Label>
+                    <Value>=first(Fields!city.Value,"address_info")</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Value>, </Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Label>state</Label>
+                    <Value>=first(Fields!state.Value,"address_info")</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Value xml:space="preserve"> </Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Label>zip</Label>
+                    <Value>=first(Fields!zip.Value,"address_info")</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <Top>3.57146in</Top>
+            <Left>0.06945in</Left>
+            <Height>0.30556in</Height>
+            <Width>6.4999in</Width>
+            <ZIndex>6</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox_body">
+            <CanGrow>true</CanGrow>
+            <CanShrink>true</CanShrink>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>Dear </Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Label>owner_name</Label>
+                    <Value>=First(Fields!owner_name.Value,"address_info")</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Value>,</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>The Davis County Board of Health approved a Food Service Sanitation Regulation that establishes standards to operate a food establishment within the county. applicable chapters of the Utah Administrative Code are officially adopted and incorporated into this regulation. Additionally, the regulation outlines the requirements to obtain a permit and the enforcement actions that may be taken if a food establishment is not in compliance with the regulation.</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>A </Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Label>inspection_type</Label>
+                    <Value>=first(Fields!inspection_type.Value,"inspection_info")</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Value> was recently conducted at </Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Label>name_of_establishment_</Label>
+                    <Value>=First(Fields!name_of_establishment_.Value, "address_info")</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Value> located at </Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Label>address_line1</Label>
+                    <Value>=First(Fields!address_line1.Value, "address_info")</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Value> in </Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Label>city</Label>
+                    <Value>=first(Fields!city.Value,"address_info")</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Value>. The violations noted during this inspection indicate that this food establishment was not in compliance with the established standards.</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>13pt</FontSize>
+                      <FontWeight>Bold</FontWeight>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <Top>3.87702in</Top>
+            <Left>0.06945in</Left>
+            <Height>3.46666in</Height>
+            <Width>6.4999in</Width>
+            <ZIndex>7</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Tablix Name="inspection_comments_1">
+            <TablixBody>
+              <TablixColumns>
+                <TablixColumn>
+                  <Width>0.26505in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>5.89318in</Width>
+                </TablixColumn>
+              </TablixColumns>
+              <TablixRows>
+                <TablixRow>
+                  <Height>0.25in</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Rank">
+                          <CanGrow>true</CanGrow>
+                          <CanShrink>true</CanShrink>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!Rank.Value</Value>
+                                  <Style />
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Rank</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="GUIDE_ITEM_COMMENT">
+                          <CanGrow>true</CanGrow>
+                          <CanShrink>true</CanShrink>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Label>guide_item_comment</Label>
+                                  <Value>=Fields!GUIDE_ITEM_COMMENT.Value
++Iif(Fields!isRpt.Value = 1," REPEAT.","")
++Iif(Fields!isCos.Value = 1," CORRECTED-ONSITE.","")</Value>
+                                  <Style />
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>GUIDE_ITEM_COMMENT</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+              </TablixRows>
+            </TablixBody>
+            <TablixColumnHierarchy>
+              <TablixMembers>
+                <TablixMember />
+                <TablixMember />
+              </TablixMembers>
+            </TablixColumnHierarchy>
+            <TablixRowHierarchy>
+              <TablixMembers>
+                <TablixMember>
+                  <Group Name="Details" />
+                </TablixMember>
+              </TablixMembers>
+            </TablixRowHierarchy>
+            <DataSetName>inspection_info</DataSetName>
+            <Filters>
+              <Filter>
+                <FilterExpression>=Fields!GUIDE_ITEM_DISPLAY_ORDER.Value</FilterExpression>
+                <Operator>GreaterThanOrEqual</Operator>
+                <FilterValues>
+                  <FilterValue DataType="Integer">1</FilterValue>
+                </FilterValues>
+              </Filter>
+              <Filter>
+                <FilterExpression>=Fields!GUIDE_ITEM_DISPLAY_ORDER.Value</FilterExpression>
+                <Operator>LessThanOrEqual</Operator>
+                <FilterValues>
+                  <FilterValue DataType="Integer">56</FilterValue>
+                </FilterValues>
+              </Filter>
+            </Filters>
+            <Top>9.42702in</Top>
+            <Left>0.41112in</Left>
+            <Height>0.25in</Height>
+            <Width>6.15823in</Width>
+            <ZIndex>8</ZIndex>
+            <Visibility>
+              <Hidden>=iif(
+    Sum(IIf(Fields!GUIDE_ITEM_DISPLAY_ORDER.Value &gt;= 1 and Fields!GUIDE_ITEM_DISPLAY_ORDER.Value &lt;= 56, 1, 0), "inspection_info") &gt; 0
+    , False
+    , True
+)</Hidden>
+            </Visibility>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Tablix>
+          <Textbox Name="Textbox14">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>Utah Administrative Code, Rule R392-100. Food Service Sanitation.</Value>
+                    <Style>
+                      <FontStyle>Italic</FontStyle>
+                      <FontSize>13pt</FontSize>
+                      <FontWeight>Bold</FontWeight>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox14</rd:DefaultName>
+            <Top>9.15479in</Top>
+            <Left>0.41112in</Left>
+            <Height>0.25833in</Height>
+            <Width>6.15823in</Width>
+            <ZIndex>9</ZIndex>
+            <Visibility>
+              <Hidden>=iif(
+    Sum(IIf(Fields!GUIDE_ITEM_DISPLAY_ORDER.Value &gt;= 1 and Fields!GUIDE_ITEM_DISPLAY_ORDER.Value &lt;= 56, 1, 0), "inspection_info") &gt; 0
+    , False
+    , True
+)</Hidden>
+            </Visibility>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Tablix Name="inspection_comments_2">
+            <TablixBody>
+              <TablixColumns>
+                <TablixColumn>
+                  <Width>0.26505in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>5.89318in</Width>
+                </TablixColumn>
+              </TablixColumns>
+              <TablixRows>
+                <TablixRow>
+                  <Height>0.425in</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Rank2">
+                          <CanGrow>true</CanGrow>
+                          <CanShrink>true</CanShrink>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!Rank.Value</Value>
+                                  <Style />
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Rank</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="GUIDE_ITEM_COMMENT2">
+                          <CanGrow>true</CanGrow>
+                          <CanShrink>true</CanShrink>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Label>guide_item_comment</Label>
+                                  <Value>=Fields!GUIDE_ITEM_COMMENT.Value
++Iif(Fields!isRpt.Value = 1," REPEAT.","")
++Iif(Fields!isCos.Value = 1," CORRECTED-ONSITE.","")</Value>
+                                  <Style />
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>GUIDE_ITEM_COMMENT</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+              </TablixRows>
+            </TablixBody>
+            <TablixColumnHierarchy>
+              <TablixMembers>
+                <TablixMember />
+                <TablixMember />
+              </TablixMembers>
+            </TablixColumnHierarchy>
+            <TablixRowHierarchy>
+              <TablixMembers>
+                <TablixMember>
+                  <Group Name="Details2" />
+                </TablixMember>
+              </TablixMembers>
+            </TablixRowHierarchy>
+            <DataSetName>inspection_info</DataSetName>
+            <Filters>
+              <Filter>
+                <FilterExpression>=Fields!GUIDE_ITEM_DISPLAY_ORDER.Value</FilterExpression>
+                <Operator>Equal</Operator>
+                <FilterValues>
+                  <FilterValue DataType="Integer">57</FilterValue>
+                </FilterValues>
+              </Filter>
+            </Filters>
+            <Top>10.83812in</Top>
+            <Left>0.41112in</Left>
+            <Height>0.425in</Height>
+            <Width>6.15823in</Width>
+            <ZIndex>10</ZIndex>
+            <Visibility>
+              <Hidden>=iif(
+    Sum(IIf(Fields!GUIDE_ITEM_DISPLAY_ORDER.Value &gt;= 57 and Fields!GUIDE_ITEM_DISPLAY_ORDER.Value &lt;= 57, 1, 0), "inspection_info") &gt; 0
+    , False
+    , True
+)</Hidden>
+            </Visibility>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Tablix>
+          <Textbox Name="Textbox15">
+            <CanGrow>true</CanGrow>
+            <CanShrink>true</CanShrink>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>Utah Administrative Code, Rule R392-103. Food Handler Training and Certificate.</Value>
+                    <Style>
+                      <FontStyle>Italic</FontStyle>
+                      <FontSize>13pt</FontSize>
+                      <FontWeight>Bold</FontWeight>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox14</rd:DefaultName>
+            <Top>10.50201in</Top>
+            <Left>0.41112in</Left>
+            <Height>0.33611in</Height>
+            <Width>6.15823in</Width>
+            <ZIndex>11</ZIndex>
+            <Visibility>
+              <Hidden>=iif(
+    Sum(IIf(Fields!GUIDE_ITEM_DISPLAY_ORDER.Value &gt;= 57 and Fields!GUIDE_ITEM_DISPLAY_ORDER.Value &lt;= 57, 1, 0), "inspection_info") &gt; 0
+    , False
+    , True
+)</Hidden>
+            </Visibility>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox20">
+            <CanGrow>true</CanGrow>
+            <CanShrink>true</CanShrink>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox20</rd:DefaultName>
+            <Top>9.67701in</Top>
+            <Left>0.41112in</Left>
+            <Height>0.825in</Height>
+            <Width>6.15823in</Width>
+            <ZIndex>12</ZIndex>
+            <Visibility>
+              <Hidden>=iif(
+    Sum(IIf(Fields!GUIDE_ITEM_DISPLAY_ORDER.Value &gt;= 1 and Fields!GUIDE_ITEM_DISPLAY_ORDER.Value &lt;= 56, 1, 0), "inspection_info") &gt; 0
+    , False
+    , True
+)</Hidden>
+            </Visibility>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Tablix Name="inspection_comments_3">
+            <TablixBody>
+              <TablixColumns>
+                <TablixColumn>
+                  <Width>0.26505in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>5.89318in</Width>
+                </TablixColumn>
+              </TablixColumns>
+              <TablixRows>
+                <TablixRow>
+                  <Height>0.425in</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Rank3">
+                          <CanGrow>true</CanGrow>
+                          <CanShrink>true</CanShrink>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!Rank.Value</Value>
+                                  <Style />
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Rank</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="GUIDE_ITEM_COMMENT3">
+                          <CanGrow>true</CanGrow>
+                          <CanShrink>true</CanShrink>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Label>guide_item_comment</Label>
+                                  <Value>=Fields!GUIDE_ITEM_COMMENT.Value
++Iif(Fields!isRpt.Value = 1," REPEAT.","")
++Iif(Fields!isCos.Value = 1," CORRECTED-ONSITE.","")</Value>
+                                  <Style />
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>GUIDE_ITEM_COMMENT</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+              </TablixRows>
+            </TablixBody>
+            <TablixColumnHierarchy>
+              <TablixMembers>
+                <TablixMember />
+                <TablixMember />
+              </TablixMembers>
+            </TablixColumnHierarchy>
+            <TablixRowHierarchy>
+              <TablixMembers>
+                <TablixMember>
+                  <Group Name="Details3" />
+                </TablixMember>
+              </TablixMembers>
+            </TablixRowHierarchy>
+            <DataSetName>inspection_info</DataSetName>
+            <Filters>
+              <Filter>
+                <FilterExpression>=Fields!GUIDE_ITEM_DISPLAY_ORDER.Value</FilterExpression>
+                <Operator>GreaterThanOrEqual</Operator>
+                <FilterValues>
+                  <FilterValue DataType="Integer">58</FilterValue>
+                </FilterValues>
+              </Filter>
+              <Filter>
+                <FilterExpression>=Fields!GUIDE_ITEM_DISPLAY_ORDER.Value</FilterExpression>
+                <Operator>LessThanOrEqual</Operator>
+                <FilterValues>
+                  <FilterValue DataType="Integer">60</FilterValue>
+                </FilterValues>
+              </Filter>
+            </Filters>
+            <Top>12.2909in</Top>
+            <Left>0.41112in</Left>
+            <Height>0.425in</Height>
+            <Width>6.15823in</Width>
+            <ZIndex>13</ZIndex>
+            <Visibility>
+              <Hidden>=iif(
+    Sum(IIf(Fields!GUIDE_ITEM_DISPLAY_ORDER.Value &gt;= 58 and Fields!GUIDE_ITEM_DISPLAY_ORDER.Value &lt;= 60, 1, 0), "inspection_info") &gt; 0
+    , False
+    , True
+)</Hidden>
+            </Visibility>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Tablix>
+          <Textbox Name="other_applicable_rules">
+            <CanGrow>true</CanGrow>
+            <CanShrink>true</CanShrink>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>Other Applicable Rules</Value>
+                    <Style>
+                      <FontStyle>Italic</FontStyle>
+                      <FontSize>13pt</FontSize>
+                      <FontWeight>Bold</FontWeight>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <Top>12.03257in</Top>
+            <Left>0.41112in</Left>
+            <Height>0.25833in</Height>
+            <Width>6.15823in</Width>
+            <ZIndex>14</ZIndex>
+            <Visibility>
+              <Hidden>=iif(
+    Sum(IIf(Fields!GUIDE_ITEM_DISPLAY_ORDER.Value &gt;= 58 and Fields!GUIDE_ITEM_DISPLAY_ORDER.Value &lt;= 60, 1, 0), "inspection_info") &gt; 0
+    , False
+    , True
+)</Hidden>
+            </Visibility>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox21">
+            <CanGrow>true</CanGrow>
+            <CanShrink>true</CanShrink>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox20</rd:DefaultName>
+            <Top>11.26312in</Top>
+            <Left>0.41112in</Left>
+            <Height>0.76945in</Height>
+            <Width>6.15823in</Width>
+            <ZIndex>15</ZIndex>
+            <Visibility>
+              <Hidden>=iif(
+    Sum(IIf(Fields!GUIDE_ITEM_DISPLAY_ORDER.Value &gt;= 57 and Fields!GUIDE_ITEM_DISPLAY_ORDER.Value &lt;= 57, 1, 0), "inspection_info") &gt; 0
+    , False
+    , True
+)</Hidden>
+            </Visibility>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox30">
+            <CanGrow>true</CanGrow>
+            <CanShrink>true</CanShrink>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>ACTIONS</Value>
+                    <Style>
+                      <FontSize>13pt</FontSize>
+                      <FontWeight>Bold</FontWeight>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>By </Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Label>todayDate_plus_15days</Label>
+                    <Value>=DateAdd("d", 15, Globals!ExecutionTime)</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                      <Format>MMMM d, yyyy</Format>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Value>, the violations noted must be remediated. On or after this date, a follow-up inspection will take place. A fee of $100 will be invoiced for each follow-up inspection.</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                      <Format>MMMM d, yyyy</Format>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                      <Format>MMMM d, yyyy</Format>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox30</rd:DefaultName>
+            <Top>12.7159in</Top>
+            <Left>0.05557in</Left>
+            <Height>1.225in</Height>
+            <Width>6.4999in</Width>
+            <ZIndex>16</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox31">
+            <CanGrow>true</CanGrow>
+            <CanShrink>true</CanShrink>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>Consultation or Extension Request</Value>
+                    <Style>
+                      <FontSize>12pt</FontSize>
+                      <FontWeight>Bold</FontWeight>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>You may dispute the violations listed or request an extension of the deadline within ten days from the registered receipt or service of this Notice. Any requests for a consultation or extension must be made in writing to the Environmental Health Division.</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>     •     A request for an extension must include a schedule for compliance.</Value>
+                    <Style>
+                      <FontStyle>Normal</FontStyle>
+                      <FontSize>11pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                      <TextDecoration>None</TextDecoration>
+                      <Color>#000000</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontStyle>Normal</FontStyle>
+                      <FontSize>11pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                      <TextDecoration>None</TextDecoration>
+                      <Color>#000000</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>Failure to Comply</Value>
+                    <Style>
+                      <FontStyle>Normal</FontStyle>
+                      <FontSize>13pt</FontSize>
+                      <FontWeight>Bold</FontWeight>
+                      <TextDecoration>None</TextDecoration>
+                      <Color>#000000</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>Failure to comply with this notice may result in further legal action.</Value>
+                    <Style>
+                      <FontStyle>Normal</FontStyle>
+                      <FontSize>11pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                      <TextDecoration>None</TextDecoration>
+                      <Color>#000000</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontStyle>Normal</FontStyle>
+                      <FontSize>11pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                      <TextDecoration>None</TextDecoration>
+                      <Color>#000000</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>If you have questions regarding this Notice, contact me at 801-525-5128</Value>
+                    <Style>
+                      <FontStyle>Normal</FontStyle>
+                      <FontSize>11pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                      <TextDecoration>None</TextDecoration>
+                      <Color>#000000</Color>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Label> or email me at &lt;inspector_email&gt;.</Label>
+                    <Value>=Iif(
+    Lookup(Parameters!user_name.Value, Fields!inspector_name.Value, Fields!inspector_email.Value, "inspector_list") &lt;&gt; ""
+    , " or "+Lookup(Parameters!user_name.Value, Fields!inspector_name.Value, Fields!inspector_email.Value, "inspector_list")+"."
+    , "."
+)</Value>
+                    <Style>
+                      <FontStyle>Normal</FontStyle>
+                      <FontSize>11pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                      <TextDecoration>None</TextDecoration>
+                      <Color>#000000</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontStyle>Normal</FontStyle>
+                      <FontSize>11pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                      <TextDecoration>None</TextDecoration>
+                      <Color>#000000</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontStyle>Normal</FontStyle>
+                      <FontSize>11pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                      <TextDecoration>None</TextDecoration>
+                      <Color>#000000</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontStyle>Normal</FontStyle>
+                      <FontSize>11pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                      <TextDecoration>None</TextDecoration>
+                      <Color>#000000</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox31</rd:DefaultName>
+            <Top>13.95479in</Top>
+            <Left>0.06946in</Left>
+            <Height>3.30945in</Height>
+            <Width>6.4999in</Width>
+            <ZIndex>17</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox41">
+            <CanGrow>true</CanGrow>
+            <CanShrink>true</CanShrink>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Label>Approval:</Label>
+                    <Value>Approval:</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox41</rd:DefaultName>
+            <Top>17.26702in</Top>
+            <Left>3.34717in</Left>
+            <Height>0.25in</Height>
+            <Width>3.23607in</Width>
+            <ZIndex>18</ZIndex>
+            <Visibility>
+              <Hidden>=Iif(Parameters!manager_name.Value &lt;&gt; "", False,True)</Hidden>
+            </Visibility>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox42">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>Sincerely,</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox42</rd:DefaultName>
+            <Top>17.26703in</Top>
+            <Left>0.08334in</Left>
+            <Height>0.2361in</Height>
+            <Width>3.18051in</Width>
+            <ZIndex>19</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox49">
+            <CanGrow>true</CanGrow>
+            <CanShrink>true</CanShrink>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Label>inspector_name</Label>
+                    <Value>=Parameters!user_name.Value</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox49</rd:DefaultName>
+            <Top>17.51702in</Top>
+            <Left>0.08334in</Left>
+            <Height>0.25in</Height>
+            <Width>3.18051in</Width>
+            <ZIndex>20</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox1">
+            <CanGrow>true</CanGrow>
+            <CanShrink>true</CanShrink>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>=Parameters!manager_name.Value</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox1</rd:DefaultName>
+            <Top>17.51702in</Top>
+            <Left>3.34717in</Left>
+            <Height>0.25in</Height>
+            <Width>3.24994in</Width>
+            <ZIndex>21</ZIndex>
+            <Visibility>
+              <Hidden>=Iif(Parameters!manager_name.Value &lt;&gt; "", False,True)</Hidden>
+            </Visibility>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox2">
+            <CanShrink>true</CanShrink>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Label>title</Label>
+                    <Value>=Lookup(Parameters!user_name.Value, Fields!inspector_name.Value, Fields!inspector_title.Value, "inspector_list")</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox2</rd:DefaultName>
+            <Top>17.76702in</Top>
+            <Left>0.08333in</Left>
+            <Height>0.275in</Height>
+            <Width>3.18052in</Width>
+            <ZIndex>22</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox3">
+            <CanGrow>true</CanGrow>
+            <CanShrink>true</CanShrink>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Label>Environmental Health Division</Label>
+                    <Value>=IIf(
+    iif(
+        IsNothing(
+            Lookup(Parameters!user_name.Value, Fields!inspector_name.Value, Fields!inspector_title.Value, "inspector_list")
+        )
+        ,""
+        ,Lookup(Parameters!user_name.Value, Fields!inspector_name.Value, Fields!inspector_title.Value, "inspector_list")
+    ) = ""
+    , ""
+    , "Environmental Health Division"
+)</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox3</rd:DefaultName>
+            <Top>18.04202in</Top>
+            <Left>0.08334in</Left>
+            <Height>0.25in</Height>
+            <Width>3.1805in</Width>
+            <ZIndex>23</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox4">
+            <CanGrow>true</CanGrow>
+            <CanShrink>true</CanShrink>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Label>manager_title</Label>
+                    <Value>=Lookup(Parameters!manager_name.Value, Fields!manager_name.Value, Fields!manager_title.Value, "manager_names")</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox4</rd:DefaultName>
+            <Top>17.79202in</Top>
+            <Left>3.34717in</Left>
+            <Height>0.25in</Height>
+            <Width>3.24994in</Width>
+            <ZIndex>24</ZIndex>
+            <Visibility>
+              <Hidden>=Iif(Parameters!manager_name.Value &lt;&gt; "", False,True)</Hidden>
+            </Visibility>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox5">
+            <CanGrow>true</CanGrow>
+            <CanShrink>true</CanShrink>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>Environmental Health Division</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox5</rd:DefaultName>
+            <Top>18.04202in</Top>
+            <Left>3.34717in</Left>
+            <Height>0.25in</Height>
+            <Width>3.24994in</Width>
+            <ZIndex>25</ZIndex>
+            <Visibility>
+              <Hidden>=Iif(Parameters!manager_name.Value &lt;&gt; "", False,True)</Hidden>
+            </Visibility>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox7">
+            <CanGrow>true</CanGrow>
+            <CanShrink>true</CanShrink>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>Violations</Value>
+                    <Style>
+                      <FontSize>13pt</FontSize>
+                      <FontWeight>Bold</FontWeight>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox7</rd:DefaultName>
+            <Top>8.90479in</Top>
+            <Left>0.06945in</Left>
+            <Height>0.25in</Height>
+            <Width>2.075in</Width>
+            <ZIndex>26</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox8">
+            <CanGrow>true</CanGrow>
+            <CanShrink>true</CanShrink>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>Findings</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                      <FontWeight>Bold</FontWeight>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>The following violations were documented during the most recent inspection. Those designated with an (*) are major violations that must be corrected immediately.</Value>
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value />
+                    <Style>
+                      <FontSize>11pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox8</rd:DefaultName>
+            <Top>7.34368in</Top>
+            <Left>0.06945in</Left>
+            <Height>1.56111in</Height>
+            <Width>6.4999in</Width>
+            <ZIndex>27</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Image Name="logo">
+            <Source>Database</Source>
+            <Value>=First(Fields!LOGO_CONTENT.Value, "logo")</Value>
+            <MIMEType>image/png</MIMEType>
+            <Sizing>Fit</Sizing>
+            <Top>0.01389in</Top>
+            <Left>0.08334in</Left>
+            <Height>0.625in</Height>
+            <Width>0.59283in</Width>
+            <ZIndex>28</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Image>
+        </ReportItems>
+        <Height>18.66349in</Height>
+        <Style>
+          <Border>
+            <Style>None</Style>
+          </Border>
+        </Style>
+      </Body>
+      <Width>6.59711in</Width>
+      <Page>
+        <PageHeader>
+          <Height>0.42222in</Height>
+          <PrintOnFirstPage>true</PrintOnFirstPage>
+          <PrintOnLastPage>true</PrintOnLastPage>
+          <ReportItems>
+            <Textbox Name="Textbox6">
+              <CanGrow>true</CanGrow>
+              <KeepTogether>true</KeepTogether>
+              <Paragraphs>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Label>first(name_of_establishment_)</Label>
+                      <Value>=first(Fields!name_of_establishment_.Value,"address_info")</Value>
+                      <Style>
+                        <FontStyle>Normal</FontStyle>
+                        <FontFamily>Arial Narrow</FontFamily>
+                        <FontSize>11pt</FontSize>
+                        <FontWeight>Normal</FontWeight>
+                        <TextDecoration>None</TextDecoration>
+                        <Color>#a09c98</Color>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style>
+                    <TextAlign>Right</TextAlign>
+                  </Style>
+                </Paragraph>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>=Globals!ExecutionTime</Value>
+                      <Style>
+                        <FontStyle>Normal</FontStyle>
+                        <FontFamily>Arial Narrow</FontFamily>
+                        <FontSize>11pt</FontSize>
+                        <FontWeight>Normal</FontWeight>
+                        <Format>MMMM d, yyyy</Format>
+                        <TextDecoration>None</TextDecoration>
+                        <Color>#a09c98</Color>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style>
+                    <TextAlign>Right</TextAlign>
+                  </Style>
+                </Paragraph>
+              </Paragraphs>
+              <rd:DefaultName>Textbox6</rd:DefaultName>
+              <Left>0.08334in</Left>
+              <Height>0.42222in</Height>
+              <Width>6.47213in</Width>
+              <Visibility>
+                <Hidden>=iif(Globals!PageNumber = 1, True, False)</Hidden>
+              </Visibility>
+              <Style>
+                <Border>
+                  <Style>None</Style>
+                </Border>
+                <PaddingLeft>2pt</PaddingLeft>
+                <PaddingRight>2pt</PaddingRight>
+                <PaddingTop>2pt</PaddingTop>
+                <PaddingBottom>2pt</PaddingBottom>
+              </Style>
+            </Textbox>
+          </ReportItems>
+          <Style>
+            <Border>
+              <Style>None</Style>
+            </Border>
+          </Style>
+        </PageHeader>
+        <LeftMargin>1in</LeftMargin>
+        <RightMargin>0.5in</RightMargin>
+        <TopMargin>1in</TopMargin>
+        <BottomMargin>1in</BottomMargin>
+        <Style />
+      </Page>
+    </ReportSection>
+  </ReportSections>
+  <ReportParameters>
+    <ReportParameter Name="delivery_method">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <DefaultValue>
+        <Values>
+          <Value>EMAIL</Value>
+        </Values>
+      </DefaultValue>
+      <AllowBlank>true</AllowBlank>
+      <Prompt>Delivery Method</Prompt>
+      <ValidValues>
+        <ParameterValues>
+          <ParameterValue>
+            <Value>CERTIFIED MAIL</Value>
+            <Label>CERTIFIED MAIL</Label>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>HAND DELIVERED</Value>
+            <Label>HAND DELIVERED</Label>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>EMAIL</Value>
+            <Label>EMAIL</Label>
+          </ParameterValue>
+          <ParameterValue>
+            <Value />
+          </ParameterValue>
+        </ParameterValues>
+      </ValidValues>
+    </ReportParameter>
+    <ReportParameter Name="inspection_id">
+      <DataType>Integer</DataType>
+      <Prompt>InspectionID Number</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="user_id">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>=User!UserID</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>user id</Prompt>
+      <Hidden>true</Hidden>
+    </ReportParameter>
+    <ReportParameter Name="user_name">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>=User!UserID</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>User name to sign with</Prompt>
+      <ValidValues>
+        <DataSetReference>
+          <DataSetName>inspector_list</DataSetName>
+          <ValueField>inspector_name</ValueField>
+          <LabelField>inspector_name</LabelField>
+        </DataSetReference>
+      </ValidValues>
+    </ReportParameter>
+    <ReportParameter Name="manager_name">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <DefaultValue>
+        <Values>
+          <Value />
+        </Values>
+      </DefaultValue>
+      <AllowBlank>true</AllowBlank>
+      <Prompt>Manager's Name (blank if you are a manager)</Prompt>
+      <ValidValues>
+        <DataSetReference>
+          <DataSetName>manager_names</DataSetName>
+          <ValueField>manager_name</ValueField>
+          <LabelField>manager_name</LabelField>
+        </DataSetReference>
+      </ValidValues>
+    </ReportParameter>
+  </ReportParameters>
+  <ReportParametersLayout>
+    <GridLayoutDefinition>
+      <NumberOfColumns>4</NumberOfColumns>
+      <NumberOfRows>2</NumberOfRows>
+      <CellDefinitions>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>0</RowIndex>
+          <ParameterName>delivery_method</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>2</ColumnIndex>
+          <RowIndex>0</RowIndex>
+          <ParameterName>inspection_id</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>3</ColumnIndex>
+          <RowIndex>0</RowIndex>
+          <ParameterName>user_id</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>1</RowIndex>
+          <ParameterName>user_name</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>1</ColumnIndex>
+          <RowIndex>1</RowIndex>
+          <ParameterName>manager_name</ParameterName>
+        </CellDefinition>
+      </CellDefinitions>
+    </GridLayoutDefinition>
+  </ReportParametersLayout>
+  <EmbeddedImages>
+    <EmbeddedImage Name="colorlogo">
+      <MIMEType>image/png</MIMEType>
+      <ImageData>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</ImageData>
+    </EmbeddedImage>
+  </EmbeddedImages>
+  <rd:ReportUnitType>Inch</rd:ReportUnitType>
+  <rd:ReportID>3449c6bb-968c-4bbc-9b3b-6495509fc064</rd:ReportID>
+</Report>
