@@ -1,0 +1,2950 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report MustUnderstand="df" xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner" xmlns:df="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition/defaultfontfamily">
+  <df:DefaultFontFamily>Segoe UI</df:DefaultFontFamily>
+  <AutoRefresh>0</AutoRefresh>
+  <DataSources>
+    <DataSource Name="davis">
+      <ConnectionProperties>
+        <DataProvider>SQL</DataProvider>
+        <ConnectString>Data Source=172.0.100.26;Initial Catalog=accelaconv1</ConnectString>
+        <Prompt>Specify a user name and password for data source davis:</Prompt>
+      </ConnectionProperties>
+      <rd:SecurityType>DataBase</rd:SecurityType>
+      <rd:DataSourceID>ce027993-1ed4-4d8e-a013-8bd0c7a5378e</rd:DataSourceID>
+    </DataSource>
+  </DataSources>
+  <DataSets>
+    <DataSet Name="logo">
+      <Query>
+        <DataSourceName>davis</DataSourceName>
+        <CommandText>select
+	LOGO_CONTENT
+from RSERV_LOGO logo
+where
+	1=1
+	and logo.SERV_PROV_CODE = 'DAVISCO'
+	and logo.LOGO_TYPE = 'AGENCY_LOGO_SSRS'
+;</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="LOGO_CONTENT">
+          <DataField>LOGO_CONTENT</DataField>
+          <rd:TypeName>System.Byte[]</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="physical_mailing_url__header">
+      <Query>
+        <DataSourceName>davis</DataSourceName>
+        <CommandText>/*
+physical address
+mailing address
+url
+*/
+--physical address 
+select
+	'physical_address' as [key]
+	,value_desc as [value]
+from RBIZDOMAIN_VALUE logo
+where
+	1=1
+	and SERV_PROV_CODE = 'DAVISCO'
+	and BIZDOMAIN = 'rpt_config'
+	and BIZDOMAIN_VALUE = 'Report_PhysicialAddr'
+
+union
+
+select
+	'physical_address' as [key]
+	,'22 S State Street, Clearfield, UT 84015' as [value]
+where not exists (
+	select 1
+	from RBIZDOMAIN_VALUE logo
+	where
+		1=1
+		and SERV_PROV_CODE = 'DAVISCO'
+		and BIZDOMAIN = 'rpt_config'
+		and BIZDOMAIN_VALUE = 'Report_PhysicialAddr'
+)
+union
+--mailing address
+select
+	'mailing_address' as [key]
+	,value_desc as [value]
+from RBIZDOMAIN_VALUE logo
+where
+	1=1
+	and SERV_PROV_CODE = 'DAVISCO'
+	and BIZDOMAIN = 'rpt_config'
+	and BIZDOMAIN_VALUE = 'Report_MailingAddr'
+
+union
+
+select
+	'mailing_address' as [key]
+	,'PO Box 618, Farmington, UT 84025' as [value]
+where not exists (
+	select 1
+	from RBIZDOMAIN_VALUE logo
+	where
+		1=1
+		and SERV_PROV_CODE = 'DAVISCO'
+		and BIZDOMAIN = 'rpt_config'
+		and BIZDOMAIN_VALUE = 'Report_MailingAddr'
+)
+union
+--url
+select
+	'url' as [key]
+	,value_desc as [value]
+from RBIZDOMAIN_VALUE logo
+where
+	1=1
+	and SERV_PROV_CODE = 'DAVISCO'
+	and BIZDOMAIN = 'rpt_config'
+	and BIZDOMAIN_VALUE = 'Report_Email'
+
+union
+
+select
+	'url' as [key]
+	,'daviscountyutah.gov/health' as [value]
+where not exists (
+	select 1
+	from RBIZDOMAIN_VALUE logo
+	where
+		1=1
+		and SERV_PROV_CODE = 'DAVISCO'
+		and BIZDOMAIN = 'rpt_config'
+		and BIZDOMAIN_VALUE = 'Report_Email'
+)</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="key">
+          <DataField>key</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="value">
+          <DataField>value</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="top_block">
+      <Query>
+        <DataSourceName>davis</DataSourceName>
+        <QueryParameters>
+          <QueryParameter Name="@inspection_id">
+            <Value>=Parameters!inspection_id.Value</Value>
+          </QueryParameter>
+        </QueryParameters>
+        <CommandText>---- Inspection Report (https://redmine.scubeenterprise.com/issues/19508)
+-----------------------------------------
+---- Description: top_block
+---- Version:1.0
+-----------------------------------------
+---- Created:  2024-08-09 - js - Notes
+---- Modified: 2024-08-09 - js - Notes
+-- 
+---------------------------------------------
+---------- Development Code
+------ DECLARE Statements below this
+--DECLARE @inspection_id int;
+--
+------ SET Statements below this
+--set @inspection_id = 18002;
+-------------------------------------------
+--Main SQL below this
+
+/*
+_myB1permit
+myB1permit
+customFields
+violation_count
+isRpt_box
+isRpt_list
+actual_query
+*/
+;with _myB1permit as (
+	select 
+		*
+		, b1_per_group+'/'+b1_per_type+'/'+b1_per_sub_type+'/'+B1_PER_CATEGORY as concatted_4level 
+	from b1permit
+    WHERE
+        1=1
+        and serv_prov_code = 'DAVISCO'
+), myB1permit as (
+	select
+		a.*
+		,(case 
+			when a.concatted_4level like 'EnvHealth/Food Retail/%' then 'Food Sanitation Program'
+			when a.concatted_4level like 'EnvHealth/Rec Health/%' then 'Pool Sanitation Program'
+			when a.concatted_4level like 'EnvHealth/Institution/School/%' then 'School Sanitation Program'
+			when a.concatted_4level like 'EnvHealth/Land Use/%' then 'Onsite Wastewater Program'
+			when a.concatted_4level like 'EnvHealth/Personal Services/Body Art%' then 'Body Art Sanitation Program'
+			when a.concatted_4level like 'EnvHealth/Personal Services/Tanning/%' then 'Tanning Sanitation Program'
+			when a.concatted_4level like 'EnvHealth/Station/Inspector/%' then 'Vehicle Emission I/M Program'
+			when a.concatted_4level like 'EnvHealth/Events/Temporary Mass Gathering/%' then 'Temporary Mass Gathering Program'
+			else null
+			end
+		) as record_type
+	from _myB1permit a 
+	where
+		1=1
+        and serv_prov_code = 'DAVISCO'
+)
+
+, customFields as (
+	SELECT
+		a.serv_prov_code 
+		,a.b1_per_id1
+		,a.b1_per_id2
+		,a.b1_per_id3
+		,max(CASE WHEN b.B1_CHECKBOX_DESC = 'Establishment Name' THEN b.B1_CHECKLIST_COMMENT END) AS establishment_name
+		,max(CASE WHEN b.B1_CHECKBOX_DESC = 'Program Element' THEN b.B1_CHECKLIST_COMMENT END) AS program_element
+		,max(CASE WHEN b.B1_CHECKBOX_DESC = 'Risk' THEN b.B1_CHECKLIST_COMMENT END) AS risk
+		,max(CASE WHEN b.B1_CHECKBOX_DESC = 'permit type' THEN b.B1_CHECKLIST_COMMENT END) AS permit_type
+		,max(CASE WHEN b.B1_CHECKBOX_DESC = 'Type of System' THEN b.B1_CHECKLIST_COMMENT END) AS type_of_system
+		,max(CASE WHEN b.B1_CHECKBOX_DESC = 'If alternative, select type:' THEN b.B1_CHECKLIST_COMMENT END) AS if_alternative_select_type
+		,max(CASE WHEN b.B1_CHECKBOX_DESC = 'Type of Pool ASI' THEN b.B1_CHECKLIST_COMMENT END) AS type_of_pool_ASI
+		,max(CASE WHEN b.B1_CHECKBOX_DESC = 'School Type' THEN b.B1_CHECKLIST_COMMENT END) AS School_Type
+	
+	FROM b1permit a 
+	LEFT JOIN BCHCKBOX b ON b.SERV_PROV_CODE = a.SERV_PROV_CODE AND CONCAT(b.b1_per_id1, b.b1_per_id2, b.b1_per_id3) = CONCAT(a.b1_per_id1, a.b1_per_id2, a.b1_per_id3)
+	WHERE
+		1=1
+        and a.serv_prov_code = 'DAVISCO'
+		and B1_CHECKBOX_DESC IN (
+			'Establishment Name'
+			, 'Program Element'
+			, 'Risk'
+			, 'permit type'
+			,'Type of System'
+			,'If alternative, select type:'
+			,'Type of Pool ASI'
+			,'School Type'
+		)
+	GROUP BY 
+		a.serv_prov_code 
+		,a.b1_per_id1
+		,a.b1_per_id2
+		,a.b1_per_id3
+
+)
+
+, _violation_count as (
+	select 
+		 a.SERV_PROV_CODE
+		,a.B1_PER_ID1
+		,a.B1_PER_ID2
+		,a.B1_PER_ID3
+		,g.G6_ACT_NUM
+		--,g.GUIDESHEET_SEQ_NBR
+		,gi.GUIDE_ITEM_SEQ_NBR
+		,case when 0 = count(asitv.ATTRIBUTE_VALUE) then 1 else count(asitv.ATTRIBUTE_VALUE) end as violation_count
+	from G6ACTION a
+	join b1permit b on b.SERV_PROV_CODE = a.SERV_PROV_CODE and concat(b.b1_per_id1,b.b1_per_id2,b.b1_per_id3) = concat(a.b1_per_id1,a.b1_per_id2,a.b1_per_id3)
+	join GGUIDESHEET g on g.SERV_PROV_CODE = a.SERV_PROV_CODE and concat(g.b1_per_id1,g.b1_per_id2,g.b1_per_id3) = concat(a.b1_per_id1,a.b1_per_id2,a.b1_per_id3) and g.G6_ACT_NUM = a.g6_act_num
+	join gguidesheet_item gi on gi.SERV_PROV_CODE = a.SERV_PROV_CODE and gi.GUIDESHEET_SEQ_NBR = g.GUIDESHEET_SEQ_NBR
+	left join GGDSHEET_ITEM_ASITAB_VALUE asitv 
+		on asitv.SERV_PROV_CODE = a.SERV_PROV_CODE 
+		and asitv.GUIDESHEET_SEQ_NBR = g.GUIDESHEET_SEQ_NBR 
+		and asitv.GUIDEITEM_SEQ_NBR = gi.GUIDE_ITEM_SEQ_NBR
+		and asitv.ASITAB_NAME = 'Comment'
+		--and asitv.ASITAB_GRP_NAM = 'FOOD CHECKLIST'
+	where
+		1=1
+		and a.SERV_PROV_CODE = 'DAVISCO'
+		and a.g6_act_num = @inspection_id
+		and gi.GUIDE_ITEM_STATUS = 'OUT'
+	group by 
+		a.SERV_PROV_CODE
+		,a.B1_PER_ID1
+		,a.B1_PER_ID2
+		,a.B1_PER_ID3
+		,g.G6_ACT_NUM
+		--,g.GUIDESHEET_SEQ_NBR
+		,gi.GUIDE_ITEM_SEQ_NBR
+		
+)
+, violation_count as (
+    select
+        SERV_PROV_CODE
+        ,B1_PER_ID1
+        ,B1_PER_ID2
+        ,B1_PER_ID3
+        ,G6_ACT_NUM
+        ,sum(a.violation_count) as violation_count
+    from _violation_count a
+    group by SERV_PROV_CODE
+        ,B1_PER_ID1
+        ,B1_PER_ID2
+        ,B1_PER_ID3
+        ,G6_ACT_NUM 
+
+)
+,isRpt_box as (
+	select distinct
+		a.SERV_PROV_CODE
+		,a.b1_per_id1
+		,a.b1_per_id2
+		,a.b1_per_id3
+		,i.G6_ACT_NUM
+		,count(distinct asi_comment) ct
+		,sum(case when asi.asi_name = 'RPT'   then 1 else 0 end) as ct_rpt
+		,sum(case when asi.asi_name = 'Major Violation' then 1 else 0 end) as ct_major
+		,sum(case when asi.asi_name = 'COS'   then 1 else 0 end) as ct_cos
+	from b1permit a 
+	join G6ACTION i on i.SERV_PROV_CODE = a.SERV_PROV_CODE and  concat(i.b1_per_id1,i.b1_per_id2,i.b1_per_id3) = concat(a.b1_per_id1,a.b1_per_id2,a.b1_per_id3)
+	join GGUIDESHEET g 
+		on g.SERV_PROV_CODE = i.SERV_PROV_CODE
+		and concat(g.b1_per_id1,g.b1_per_id2,g.b1_per_id3) = concat(i.b1_per_id1,i.b1_per_id2,i.b1_per_id3) and g.G6_ACT_NUM = i.g6_act_num
+		and g.G6_ACT_NUM = i.g6_act_num
+	join GGUIDESHEET_ITEM gi 
+		on gi.SERV_PROV_CODE = i.SERV_PROV_CODE
+		and gi.GUIDESHEET_SEQ_NBR = g.GUIDESHEET_SEQ_NBR
+	join GGDSHEET_ITEM_ASI asi 
+		on asi.SERV_PROV_CODE = i.SERV_PROV_CODE
+		and asi.GUIDESHEET_SEQ_NBR = g.GUIDESHEET_SEQ_NBR
+		and asi.GUIDEITEM_SEQ_NBR = gi.GUIDE_ITEM_SEQ_NBR
+	where
+		1=1
+        and a.serv_prov_code = 'DAVISCO'
+		and i.g6_act_num = @inspection_id
+		and asi.asi_name in ('RPT','COS','Major Violation')
+		and asi.ASI_COMMENT = 'CHECKED'
+		and gi.GUIDE_ITEM_STATUS = 'OUT'
+	group by 
+		a.SERV_PROV_CODE
+		,a.b1_per_id1
+		,a.b1_per_id2
+		,a.b1_per_id3
+		,i.G6_ACT_NUM
+)
+,isRpt_list as (
+	select distinct
+		 a.serv_prov_code 
+		,a.b1_per_id1
+		,a.b1_per_id2
+		,a.b1_per_id3
+		,g.G6_ACT_NUM
+		,g.GUIDESHEET_SEQ_NBR
+		--,gi.GUIDE_ITEM_SEQ_NBR
+		--,asitv.ASITAB_ROW_INDEX
+		,sum(case when asitv.asitab_name = 'RPT' and asitv.ATTRIBUTE_VALUE = 'CHECKED' then 1 else 0 end) as ct_rpt
+		,sum(case when asitv.asitab_name = 'Major Violation' and asitv.ATTRIBUTE_VALUE = 'CHECKED' then 1 else 0 end) as ct_major
+		,sum(case when asitv.asitab_name = 'COS' and asitv.ATTRIBUTE_VALUE = 'CHECKED' then 1 else 0 end) as ct_cos
+		from G6ACTION a
+		join b1permit b on b.SERV_PROV_CODE = a.SERV_PROV_CODE and concat(b.b1_per_id1,b.b1_per_id2,b.b1_per_id3) = concat(a.b1_per_id1,a.b1_per_id2,a.b1_per_id3)
+		join GGUIDESHEET g on g.SERV_PROV_CODE = a.SERV_PROV_CODE and concat(g.b1_per_id1,g.b1_per_id2,g.b1_per_id3) = concat(a.b1_per_id1,a.b1_per_id2,a.b1_per_id3) and g.G6_ACT_NUM = a.g6_act_num
+		join gguidesheet_item gi on gi.SERV_PROV_CODE = a.SERV_PROV_CODE and gi.GUIDESHEET_SEQ_NBR = g.GUIDESHEET_SEQ_NBR
+		join GGDSHEET_ITEM_ASITAB_VALUE asitv on asitv.SERV_PROV_CODE = a.SERV_PROV_CODE and asitv.GUIDESHEET_SEQ_NBR = g.GUIDESHEET_SEQ_NBR and asitv.GUIDEITEM_SEQ_NBR = gi.GUIDE_ITEM_SEQ_NBR
+		where
+			1=1
+			and a.SERV_PROV_CODE = 'DAVISCO'
+			and a.g6_act_num = @inspection_id
+			--and ASITAB_SUBGRP_NAM = 'FOOD CHECKLIST'
+			and ASITAB_NAME in ('RPT','Major Violation','COS')
+			and gi.GUIDE_ITEM_STATUS = 'OUT'
+		group by 
+			 a.serv_prov_code 
+			,a.b1_per_id1
+			,a.b1_per_id2
+			,a.b1_per_id3
+			,g.G6_ACT_NUM
+			,g.GUIDESHEET_SEQ_NBR
+		
+)
+--actual_query
+select distinct
+	 i.RECORD_ID
+	,i.INSPECTION_ID
+	,a.record_type + ' - ' + i.INSPECTION_TYPE as report_title
+	,cf.Establishment_name
+	,cf.program_element
+	,cf.risk as risk
+	,a.concatted_4level
+	,upper(coalesce(
+		case
+			when a.concatted_4level like 'EnvHealth/Food Retail/Food Facility%' and cf.program_element = 'traditional food establishment'
+			then trim(replace(cf.program_element,'traditional','')) + isnull(' - RISK ' + cf.risk ,'')
+	
+			when a.concatted_4level like 'EnvHealth/Food Retail/Food Facility%' and cf.program_element like '%school%' then 'School Food Establishment'
+			when a.concatted_4level like 'EnvHealth/Food Retail/Flavored Ice%' then 'Flavored Ice Establishment'
+			when a.concatted_4level like 'EnvHealth/Food Retail/Microenterprise%' then 'Microenterprise Home Kitchen'
+			when a.concatted_4level like 'EnvHealth/Food Retail/Mobile Food%' then 'Mobile Food Business'
+		
+			when a.concatted_4level = 'EnvHealth/Food Retail/Temporary Food Establishment/Application' 
+			then 'Temporary Food Establishment' + isnull(' - ' + cf.permit_type + ' ' + cf.risk ,'')
+		
+			when a.concatted_4level like 'EnvHealth/Land Use/Septic%' then cf.type_of_system + isnull(' - '+cf.if_alternative_select_type,'')
+			when a.concatted_4level like 'EnvHealth/Rec Health/Pool%' then cf.program_element + isnull(' - '+cf.type_of_pool_ASI,'')
+			when a.concatted_4level like 'EnvHealth/Institution/School/%' then cf.School_Type
+			when a.concatted_4level like 'EnvHealth/Personal Services/Body Art%' then cf.program_element
+			when a.concatted_4level like 'EnvHealth/Personal Services/Tanning/%' then cf.program_element
+			when a.concatted_4level like 'EnvHealth/Station/Inspector/%' then cf.program_element
+			when a.concatted_4level like 'EnvHealth/Events/Temporary Mass Gathering/%' then cf.program_element
+			else null
+			end
+		,''
+	)) as permittedEntity_topRight
+	,i.DATE_INSP_OR_SCHE# as inspection_date
+	,addr.ADDR_FULL_LINE
+	,isnull(vc.violation_count,0) violation_count
+	,i.RESULT_ as inspection_result
+	,coalesce(isRpt_list.ct_rpt,isRpt_box.ct_rpt,0) as repeat_violation_count
+	,coalesce(isRpt_list.ct_Major,isRpt_box.ct_Major,0) as major_violation_count
+	,coalesce(isRpt_list.ct_cos,isRpt_box.ct_cos,0) as cos_violation_count
+	,coalesce(i.COMMENTS_RESULT,'No Overall Inspection Comments') overall_inspection_comments
+	,i.INSPECTOR_NAME_FML# as inspector_name
+	,coalesce( G3STAFFS.ga_fname + ' ' + G3STAFFS.GA_LNAME,g6action.REC_FUL_NAM) as recevied_by		
+from myB1permit a 
+join V_INSPECTION i on i.AGENCY_ID = a.SERV_PROV_CODE and concat(i.T_ID1,i.t_id2,i.t_id3) = concat(a.b1_per_id1,a.b1_per_id2,a.b1_per_id3)
+left join customFields cf on cf.SERV_PROV_CODE = a.SERV_PROV_CODE and concat(cf.b1_per_id1,cf.b1_per_id2,cf.b1_per_id3) = concat(a.b1_per_id1,a.b1_per_id2,a.b1_per_id3)
+left join V_ADDRESS addr on addr.AGENCY_ID = a.SERV_PROV_CODE and concat(addr.T_ID1,addr.t_id2,addr.t_id3) = concat(a.b1_per_id1,a.b1_per_id2,a.b1_per_id3)
+left join violation_count vc 
+	on vc.SERV_PROV_CODE = a.SERV_PROV_CODE 
+	and concat(vc.b1_per_id1,vc.b1_per_id2,vc.b1_per_id3) = concat(a.b1_per_id1,a.b1_per_id2,a.b1_per_id3)
+	and vc.G6_ACT_NUM = i.INSPECTION_ID
+left join isRpt_list
+	on isRpt_list.SERV_PROV_CODE = a.SERV_PROV_CODE
+	and concat(isRpt_list.b1_per_id1,isRpt_list.b1_per_id2,isRpt_list.b1_per_id3) = concat(a.b1_per_id1,a.b1_per_id2,a.b1_per_id3)
+	and isRpt_list.G6_ACT_NUM = i.INSPECTION_ID
+left join isRpt_box
+	on isRpt_box.SERV_PROV_CODE = a.SERV_PROV_CODE
+	and concat(isRpt_box.b1_per_id1,isRpt_box.b1_per_id2,isRpt_box.b1_per_id3) = concat(a.b1_per_id1,a.b1_per_id2,a.b1_per_id3)
+	and isRpt_box.G6_ACT_NUM = i.INSPECTION_ID
+left join G6ACTION 
+	on G6ACTION.SERV_PROV_CODE = a.SERV_PROV_CODE 
+	and concat(G6ACTION.b1_per_id1,G6ACTION.b1_per_id2,G6ACTION.b1_per_id3) = concat(a.b1_per_id1,a.b1_per_id2,a.b1_per_id3)
+	and g6action.g6_Act_num = i.INSPECTION_ID
+left join G3STAFFS on G3STAFFS.serv_prov_code = a.serv_prov_code and G3STAFFS.GA_USER_ID = g6action.REC_FUL_NAM
+where
+	1=1
+	and a.SERV_PROV_CODE = 'DAVISCO'
+	and i.INSPECTION_ID = @inspection_id
+	and a.record_type is not null --this filters to those defined in the spec sheet, item 5.
+order by 1,2</CommandText>
+        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
+      </Query>
+      <Fields>
+        <Field Name="RECORD_ID">
+          <DataField>RECORD_ID</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="INSPECTION_ID">
+          <DataField>INSPECTION_ID</DataField>
+          <rd:TypeName>System.Int64</rd:TypeName>
+        </Field>
+        <Field Name="report_title">
+          <DataField>report_title</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Establishment_name">
+          <DataField>Establishment_name</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="program_element">
+          <DataField>program_element</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="risk">
+          <DataField>risk</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="concatted_4level">
+          <DataField>concatted_4level</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="permittedEntity_topRight">
+          <DataField>permittedEntity_topRight</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="inspection_date">
+          <DataField>inspection_date</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
+        <Field Name="ADDR_FULL_LINE">
+          <DataField>ADDR_FULL_LINE</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="violation_count">
+          <DataField>violation_count</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="inspection_result">
+          <DataField>inspection_result</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="repeat_violation_count">
+          <DataField>repeat_violation_count</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="major_violation_count">
+          <DataField>major_violation_count</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="cos_violation_count">
+          <DataField>cos_violation_count</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="overall_inspection_comments">
+          <DataField>overall_inspection_comments</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="inspector_name">
+          <DataField>inspector_name</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="recevied_by">
+          <DataField>recevied_by</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="guidesheet_data">
+      <Query>
+        <DataSourceName>davis</DataSourceName>
+        <QueryParameters>
+          <QueryParameter Name="@inspection_id">
+            <Value>=Parameters!inspection_id.Value</Value>
+          </QueryParameter>
+        </QueryParameters>
+        <CommandText>------ Inspection Report (https://redmine.scubeenterprise.com/issues/19508)
+-----------------------------------------
+---- Description: guidesheet_data
+---- Version:1.0
+-----------------------------------------
+---- Created:  2024-08-09 - js - Notes
+---- Modified: 2024-08-09 - js - A trick here is that the client expects "comments" to be "violations", and guide_item_comment to be "comment".
+---------------------------------------
+-- Development Code
+---- DECLARE Statements below this
+--DECLARE @inspection_id int;
+--------
+------------ SET Statements below this
+--------set @inspection_id = 18687;
+--set @inspection_id = 
+----9830
+---------------------------------------------
+
+--Main SQL below this
+
+/*
+comments
+observations
+isCos_isRpt
+preResult
+stuffed_asitabValues
+__idx_val
+_idx_val
+idx_val
+_resultt
+resultt
+final_query
+*/
+
+declare @comments table (
+	serv_prov_code		varchar(100)
+	,GUIDE_ITEM_SEQ_NBR	int
+	,ASITAB_NAME		varchar(2000)
+	,ATTRIBUTE_VALUE	varchar(2000)
+	,asitab_row_index	int
+)
+insert into @comments 
+select distinct
+		a.SERV_PROV_CODE
+		,gi.GUIDE_ITEM_SEQ_NBR
+		,asitv.ASITAB_NAME
+		,asitv.ATTRIBUTE_VALUE
+		,asitv.asitab_row_index
+	from G6ACTION a with(nolock)
+	join b1permit b with(nolock) on b.SERV_PROV_CODE = a.SERV_PROV_CODE and concat(b.b1_per_id1,b.b1_per_id2,b.b1_per_id3) = concat(a.b1_per_id1,a.b1_per_id2,a.b1_per_id3)
+	join GGUIDESHEET g with(nolock) on g.SERV_PROV_CODE = a.SERV_PROV_CODE and concat(g.b1_per_id1,g.b1_per_id2,g.b1_per_id3) = concat(a.b1_per_id1,a.b1_per_id2,a.b1_per_id3) and g.G6_ACT_NUM = a.g6_act_num
+	join gguidesheet_item gi with(nolock) on gi.SERV_PROV_CODE = a.SERV_PROV_CODE and gi.GUIDESHEET_SEQ_NBR = g.GUIDESHEET_SEQ_NBR
+	join GGDSHEET_ITEM_ASITAB_VALUE asitv with(nolock) on asitv.SERV_PROV_CODE = a.SERV_PROV_CODE and asitv.GUIDESHEET_SEQ_NBR = g.GUIDESHEET_SEQ_NBR and asitv.GUIDEITEM_SEQ_NBR = gi.GUIDE_ITEM_SEQ_NBR
+	where
+		1=1
+		and a.SERV_PROV_CODE = 'DAVISCO'
+		and a.g6_act_num = @inspection_id
+		and ASITAB_NAME in ('Comment')
+;
+
+declare @observations table (
+	serv_prov_code		varchar(100)
+	,GUIDE_ITEM_SEQ_NBR	int
+	,ASITAB_NAME		varchar(2000)
+	,ATTRIBUTE_VALUE	varchar(2000)
+	,asitab_row_index	int
+)
+insert into @observations
+select distinct
+	a.SERV_PROV_CODE
+	,gi.GUIDE_ITEM_SEQ_NBR
+	,asitv.ASITAB_NAME
+	,asitv.ATTRIBUTE_VALUE
+	,asitv.asitab_row_index
+from G6ACTION a
+join b1permit b with(nolock) on b.SERV_PROV_CODE = a.SERV_PROV_CODE and concat(b.b1_per_id1,b.b1_per_id2,b.b1_per_id3) = concat(a.b1_per_id1,a.b1_per_id2,a.b1_per_id3)
+join GGUIDESHEET g with(nolock) on g.SERV_PROV_CODE = a.SERV_PROV_CODE and concat(g.b1_per_id1,g.b1_per_id2,g.b1_per_id3) = concat(a.b1_per_id1,a.b1_per_id2,a.b1_per_id3) and g.G6_ACT_NUM = a.g6_act_num
+join gguidesheet_item gi with(nolock) on gi.SERV_PROV_CODE = a.SERV_PROV_CODE and gi.GUIDESHEET_SEQ_NBR = g.GUIDESHEET_SEQ_NBR
+join GGDSHEET_ITEM_ASITAB_VALUE asitv with(nolock) on asitv.SERV_PROV_CODE = a.SERV_PROV_CODE and asitv.GUIDESHEET_SEQ_NBR = g.GUIDESHEET_SEQ_NBR and asitv.GUIDEITEM_SEQ_NBR = gi.GUIDE_ITEM_SEQ_NBR
+where
+	1=1
+	and a.SERV_PROV_CODE = 'DAVISCO'
+	and a.g6_act_num = @inspection_id
+	and ASITAB_NAME in ('Observation')
+;
+--), isCos_isRpt as (
+declare @isCos_isRpt table (
+	serv_prov_code		varchar(100)
+	,GUIDE_ITEM_SEQ_NBR int
+	,asitab_row_index	int
+	,isCos	 int
+	,isRpt	 int
+	,isMajor int
+)
+insert into @isCos_isRpt
+	select distinct
+		 a.serv_prov_code 
+		,gi.GUIDE_ITEM_SEQ_NBR
+		,asitv.ASITAB_ROW_INDEX
+		,max(case when asitv.asitab_name = 'COS' and asitv.ATTRIBUTE_VALUE = 'CHECKED' then 1 else 0 end) as isCos
+		,max(case when asitv.asitab_name = 'RPT' and asitv.ATTRIBUTE_VALUE = 'CHECKED' then 1 else 0 end) as isRpt
+		,max(case when asitv.asitab_name = 'Major Violation' and asitv.ATTRIBUTE_VALUE = 'CHECKED' then 1 else 0 end) as isMajor
+		
+	from G6ACTION a with(nolock) 
+	join b1permit b with(nolock) on b.SERV_PROV_CODE = a.SERV_PROV_CODE and concat(b.b1_per_id1,b.b1_per_id2,b.b1_per_id3) = concat(a.b1_per_id1,a.b1_per_id2,a.b1_per_id3)
+	join GGUIDESHEET g with(nolock) on g.SERV_PROV_CODE = a.SERV_PROV_CODE and concat(g.b1_per_id1,g.b1_per_id2,g.b1_per_id3) = concat(a.b1_per_id1,a.b1_per_id2,a.b1_per_id3) and g.G6_ACT_NUM = a.g6_act_num
+	join gguidesheet_item gi with(nolock) on gi.SERV_PROV_CODE = a.SERV_PROV_CODE and gi.GUIDESHEET_SEQ_NBR = g.GUIDESHEET_SEQ_NBR
+	join GGDSHEET_ITEM_ASITAB_VALUE asitv with(nolock) on asitv.SERV_PROV_CODE = a.SERV_PROV_CODE and asitv.GUIDESHEET_SEQ_NBR = g.GUIDESHEET_SEQ_NBR and asitv.GUIDEITEM_SEQ_NBR = gi.GUIDE_ITEM_SEQ_NBR
+	where
+		1=1
+		and a.SERV_PROV_CODE = 'DAVISCO'
+		and a.g6_act_num = @inspection_id
+		and ASITAB_NAME in ('COS','RPT','Major Violation')
+	group by a.serv_prov_code,gi.GUIDE_ITEM_SEQ_NBR,asitv.ASITAB_ROW_INDEX
+;
+
+declare @stuffed_asitabValues table (
+	serv_prov_code varchar(200)
+	,guide_item_seq_nbr int
+	,string varchar(2000)
+)
+--;with _stuffed_asitabValues as (
+insert into @stuffed_asitabValues
+	select distinct
+		 a.SERV_PROV_CODE
+		,gi.GUIDE_ITEM_SEQ_NBR
+		--,c.ASITAB_ROW_INDEX
+		,coalesce(c.ATTRIBUTE_VALUE,'') + coalesce( ' ('+o.ATTRIBUTE_VALUE+')','') 
+		+ coalesce(case when isCos_isRpt.isRpt=1 then ' REPEAT.' else '' end,'') 
+		+ coalesce(case when isCos_isRpt.isCos=1 then ' CORRECTED ON SITE.' else '' end,'')
+		+ coalesce(case when isCos_isRpt.isMajor=1 then ' MAJOR.' else '' end,'')
+		as string
+	from G6ACTION a
+	join b1permit b with(nolock) on b.SERV_PROV_CODE = a.SERV_PROV_CODE and concat(b.b1_per_id1,b.b1_per_id2,b.b1_per_id3) = concat(a.b1_per_id1,a.b1_per_id2,a.b1_per_id3)
+	join GGUIDESHEET g with(nolock) on g.SERV_PROV_CODE = a.SERV_PROV_CODE and concat(g.b1_per_id1,g.b1_per_id2,g.b1_per_id3) = concat(a.b1_per_id1,a.b1_per_id2,a.b1_per_id3) and g.G6_ACT_NUM = a.g6_act_num
+	join gguidesheet_item gi with(nolock) on gi.SERV_PROV_CODE = a.SERV_PROV_CODE and gi.GUIDESHEET_SEQ_NBR = g.GUIDESHEET_SEQ_NBR
+	join GGDSHEET_ITEM_ASITAB_VALUE asitv with(nolock) on asitv.SERV_PROV_CODE = a.SERV_PROV_CODE and asitv.GUIDESHEET_SEQ_NBR = g.GUIDESHEET_SEQ_NBR and asitv.GUIDEITEM_SEQ_NBR = gi.GUIDE_ITEM_SEQ_NBR
+	left join @comments c on c.serv_prov_code = a.serv_prov_code and c.GUIDE_ITEM_SEQ_NBR = gi.GUIDE_ITEM_SEQ_NBR and c.ASITAB_ROW_INDEX = asitv.ASITAB_ROW_INDEX
+	left join @observations o on o.serv_prov_code = a.serv_prov_code and o.GUIDE_ITEM_SEQ_NBR = gi.GUIDE_ITEM_SEQ_NBR  and o.ASITAB_ROW_INDEX = asitv.ASITAB_ROW_INDEX
+	left join @isCos_isRpt isCos_isRpt on isCos_isRpt.serv_prov_code = a.serv_prov_code and isCos_isRpt.GUIDE_ITEM_SEQ_NBR = gi.GUIDE_ITEM_SEQ_NBR and isCos_isRpt.ASITAB_ROW_INDEX = asitv.ASITAB_ROW_INDEX
+	where
+		1=1
+		and a.SERV_PROV_CODE = 'DAVISCO'
+		and a.g6_act_num = @inspection_id
+;
+
+
+
+declare @idx_val table (
+	guide_type varchar(2000)
+	,idx int
+	,val varchar(2000)
+	,sub_cat varchar(2000)
+	,Header_Start int 
+	,Header_End int
+	,isBroaderCat int
+	,_sort_order int	
+	,is_sub_cat int
+	,broader_cat varchar(2000)
+)
+;with ___idx_val as (
+	select distinct
+		 a.GUIDE_TYPE
+		,a.GUIDE_ITEM_TEXT as Header
+		,a.GUIDE_ITEM_DISPLAY_ORDER as Header_Start
+		,a.GUIDE_ITEM_TEXT as [value] --c.value
+	from rguidesheet_item a with (nolock)
+    --filters:
+	join gguidesheet_item gi with(nolock) on gi.SERV_PROV_CODE = a.SERV_PROV_CODE and gi.GUIDE_TYPE = a.GUIDE_TYPE
+	join GGUIDESHEET g with(nolock) on g.SERV_PROV_CODE = a.SERV_PROV_CODE and g.GUIDESHEET_SEQ_NBR = gi.GUIDESHEET_SEQ_NBR 
+	--CROSS APPLY STRING_SPLIT(trim(a.GUIDE_ITEM_TEXT), CHAR(10)) c
+	where 
+		1=1
+		and a.SERV_PROV_CODE = 'DAVISCO'
+		and a.GUIDE_ITEM_STATUS_VISIBLE is null
+		and a.REC_STATUS = 'A'
+		and g.G6_ACT_NUM = @inspection_id
+		--and c.value &lt;&gt; ''
+)
+, __idx_val as (
+	select 
+		h.GUIDE_TYPE
+		, h.Header
+		, h.Header_Start
+		, min(ISNULL(h2.Header_Start,10000)) - 1 as Header_End
+	from ___idx_val h
+	left join ___idx_val h2 on h.GUIDE_TYPE = h2.GUIDE_TYPE and h.Header_Start &lt; h2.Header_Start
+	group by h.GUIDE_TYPE, h.Header, h.Header_Start
+	--order by GUIDE_TYPE, Header_Start
+)
+, _idx_val as (
+----insert into @_idx_val
+	select distinct
+		r.guide_type 
+		,r.GUIDE_ITEM_DISPLAY_ORDER as idx
+		,r.GUIDE_ITEM_TEXT as [value] --c.[value]
+		,r.GUIDE_ITEM_TEXT as val
+		,a.header as sub_cat
+		,a.Header_Start
+		,a.Header_End
+		--,(case when r.guide_item_Text like c.value +'%' then 1 else 2 end) as _order_based_on_splitting
+		,(case 
+			when a.header_start = a.header_end then 1
+			--when c.value = r.GUIDE_ITEM_TEXT then 0
+			--when r.guide_item_text like c.value +'%' and r.guide_item_text &lt;&gt; c.value and r.guide_item_text not like '[0-9]%)%' then 1
+			--when r.guide_item_text not like '[0-9]%)%' then 1
+			else 0
+			end 
+		) as isBroaderCat
+		,(case 
+			when --when is_broader_cat, then is_sub_cat=0
+				(case 
+					when a.header_start = a.header_end then 1
+					--when c.value = r.GUIDE_ITEM_TEXT then 0
+					--when r.guide_item_text like c.value +'%' and r.guide_item_text &lt;&gt; c.value and r.guide_item_text not like '[0-9]%)%' then 1
+					else 0
+					end 
+				) = 1 then 0 
+			when r.GUIDE_ITEM_TEXT = a.header then 1
+			when r.GUIDE_ITEM_TEXT like '%'+a.header then 1
+			else 0
+			end
+		) as is_sub_cat
+	from __idx_val a 
+	left join rguidesheet_item r with(nolock) on r.GUIDE_TYPE = a.GUIDE_TYPE and r.GUIDE_ITEM_DISPLAY_ORDER between a.Header_Start and a.Header_End
+	--CROSS APPLY STRING_SPLIT(r.GUIDE_ITEM_TEXT, CHAR(10)) c
+	where 
+		1=1
+		--and r.GUIDE_ITEM_TEXT like '%'+char(10)+'%'
+		--and isnull(c.value,'') &lt;&gt; ''
+	--order by guide_type,r.GUIDE_ITEM_DISPLAY_ORDER, case when r.guide_item_Text like c.value +'%' then 1 else 2 end
+)
+--select * from ___idx_val  order by header_start
+--select * from __idx_val	 order by header_start
+--select * from _idx_val 	 
+
+insert into @idx_val
+select
+	guide_type
+	,idx
+	,a.[value] as val
+	,sub_cat
+	,Header_Start
+	,Header_End
+	,isBroaderCat
+	,ROW_NUMBER() over (order by 
+			guide_type
+			,idx
+			--,_order_based_on_splitting
+		) as _sort_order
+	,is_sub_cat
+	,isnull(c.[value],'') as broader_cat
+from _idx_val a 
+outer apply (select top 1 [value] from _idx_val where header_start &lt;= a.header_start and isBroaderCat = 1 order by Header_Start asc) c
+order by 
+	guide_type
+	, ROW_NUMBER() over (order by 
+			guide_type
+			,idx
+			--,_order_based_on_splitting
+		)
+;
+
+
+
+declare @almost_there table (
+	rownum int
+	,GUIDE_TYPE varchar(2000)
+	,toPrint varchar(2000)
+	,guide_item_status varchar(200)
+	,isBroaderCat int
+	,isSubcatHeader int 
+)
+;with _resultt as (
+	select
+		a.serv_prov_code
+		,sub_cat.broader_cat
+		,sub_cat.sub_cat
+		,gi.guide_item_text
+		,(case gi.GUIDE_ITEM_STATUS
+			when 'IN' then 'IN COMPLIANCE'
+			when 'OUT' THEN 'OUT OF COMPLIANCE'
+			WHEN 'NA' THEN 'NOT APPLICABLE'
+			WHEN 'NO' THEN 'NOT OBSERVED'
+			else ''
+			end 
+		 ) as guide_item_status
+		,gi.guide_item_comment
+		,asitv.string
+		,gi.GUIDE_TYPE
+		,gi.GUIDE_ITEM_DISPLAY_ORDER
+		,sub_cat._sort_order
+	from GGUIDESHEET a
+	join GGUIDESHEET_ITEM gi with(nolock) on gi.SERV_PROV_CODE = a.SERV_PROV_CODE and gi.GUIDESHEET_SEQ_NBR = a.GUIDESHEET_SEQ_NBR
+	left join @idx_val sub_cat on sub_cat.guide_type = gi.guide_type and sub_cat.idx = gi.guide_item_display_order 
+	join G6ACTION i with(nolock) on i.SERV_PROV_CODE = a.SERV_PROV_CODE and i.g6_act_num = a.G6_ACT_NUM
+	left join @stuffed_asitabValues asitv 
+		on asitv.SERV_PROV_CODE = a.SERV_PROV_CODE 
+		and asitv.GUIDE_ITEM_SEQ_NBR = gi.guide_item_seq_nbr
+	where
+		1=1
+		and a.serv_prov_code = 'DAVISCO'
+		and a.g6_act_num = @inspection_id
+		--and asitv.string is not null
+		and gi.guide_item_status in ('IN','OUT','NA','NO')
+	
+--order by gi.GUIDE_ITEM_DISPLAY_ORDER
+)
+----select * from _resultt
+,resultt as (
+
+	----this ensures sub_cat values are present! rem: the union will omit recurrences of these header rows.
+	select
+		a.idx
+		,a.val as toPrint
+		,'' as guide_item_status
+		,1 as isSubcatHeader
+		,r.GUIDE_TYPE
+		,a.isBroaderCat
+		,a._sort_order
+	from @idx_val a
+	join _resultt r on a.GUIDE_TYPE = r.guide_type and a.sub_cat = r.sub_cat
+	where
+		1=1
+		--and a.sub_cat = a.val
+		and a.is_sub_cat = 1 and a.isBroaderCat = 0
+		
+	union
+	--This gets broader categories, which get a different shading in the report
+	select
+		a.idx
+		,replace(replace(a.val,char(13),''),char(10),' ') as toPrint
+		,'' as guide_item_status
+		,0 as isSubcatHeader
+		,a.GUIDE_TYPE
+		,a.isBroaderCat
+		,a._sort_order
+	from @idx_val a
+	join _resultt r on a.GUIDE_TYPE = r.guide_type and a.broader_cat = r.broader_cat
+	where
+		1=1
+		--and a.sub_cat = a.val
+		and a.is_sub_cat = 0 and a.isBroaderCat = 1
+		
+	
+	
+	union
+	
+	--This gets the actual guide item and guide item status values
+	select distinct
+        a.idx
+        ,coalesce(r.guide_item_text,a.val) as toPrint
+        ,coalesce(r.GUIDE_ITEM_STATUS,'') as guide_item_status
+        ,(case when a.sub_Cat = a.val then 1 else 0 end) as isSubcatHeader
+		,r.GUIDE_TYPE
+		,a.isBroaderCat
+		,a._sort_order
+    from @idx_val a
+    join _resultt r 
+		on a.GUIDE_TYPE = r.guide_type 
+		and case 
+			when replace(r.guide_item_text,'	','') like '[0-9]) %' then substring(replace(r.guide_item_text,'	',''),4,len(replace(r.guide_item_text,'	','')))
+			when replace(r.guide_item_text,'	','') like '[0-9][0-9]) %' then substring(replace(r.guide_item_text,'	',''),5,len(replace(r.guide_item_text,'	','')))
+			else replace(r.guide_item_text,'	','')
+			end
+			=
+			case 
+			when replace(a.val,'	','') like '[0-9]) %' then substring(replace(a.val,'	',''),4,len(replace(a.val,'	','')))
+			when replace(a.val,'	','') like '[0-9][0-9]) %' then substring(replace(a.val,'	',''),5,len(replace(a.val,'	','')))
+			else replace(a.val,'	','')
+			end
+			--replaces tabs and ensures old guidesheet_text values without preceding digits still match
+
+    where
+        1=1
+        and r.serv_prov_code = 'DAVISCO'
+        and exists (
+            select 1
+            from _resultt
+            where
+                1=1
+                and sub_cat = a.sub_cat
+        )
+        and (
+            a.val = a.sub_cat 
+            or r.sub_cat is not null
+        )
+    --order by a.idx
+
+    union
+	
+    select
+        a.idx
+        ,'Comment: '+r.GUIDE_ITEM_COMMENT as toPrint
+        ,'' as guide_item_status
+        ,isSubcatHeader=0 --(case when a.sub_Cat = a.val then 1 else 0 end) as isSubcatHeader
+		,r.GUIDE_TYPE
+		,isBroaderCat = 0
+		,a._sort_order
+    from @idx_val a
+    left join _resultt r 	
+		on a.GUIDE_TYPE = r.guide_type 
+		and case 
+			when replace(r.guide_item_text,'	','') like '[0-9]) %' then substring(replace(r.guide_item_text,'	',''),4,len(replace(r.guide_item_text,'	','')))
+			when replace(r.guide_item_text,'	','') like '[0-9][0-9]) %' then substring(replace(r.guide_item_text,'	',''),5,len(replace(r.guide_item_text,'	','')))
+			else replace(r.guide_item_text,'	','')
+			end
+			=
+			case 
+			when replace(a.val,'	','') like '[0-9]) %' then substring(replace(a.val,'	',''),4,len(replace(a.val,'	','')))
+			when replace(a.val,'	','') like '[0-9][0-9]) %' then substring(replace(a.val,'	',''),5,len(replace(a.val,'	','')))
+			else replace(a.val,'	','')
+			end
+			--replaces tabs and ensures old guidesheet_text values without preceding digits still match
+    
+    where
+        1=1
+        and r.serv_prov_code = 'DAVISCO'
+        and r.GUIDE_ITEM_COMMENT is not null
+        and exists (
+            select 1
+            from _resultt
+            where
+                1=1
+                and sub_cat = a.sub_cat
+        )
+        and (
+            a.val = a.sub_cat 
+            or r.sub_cat is not null
+        )
+	
+    union
+	
+    select
+        a.idx
+        ,'Violation: '+r.string as toPrint
+        ,'' as guide_item_status
+        ,isSubcatHeader = 0 --(case when a.sub_Cat = a.val then 1 else 0 end) as isSubcatHeader
+		,r.GUIDE_TYPE
+		,isBroaderCat = 0
+		,a._sort_order
+		--,'aaaa'[r]
+		--,a.*
+		--,'rrrr'[r]
+		--,r.*
+    from @idx_val a
+    left join _resultt r 
+		on a.GUIDE_TYPE = r.guide_type 
+		and case 
+			when replace(r.guide_item_text,'	','') like '[0-9]) %' then substring(replace(r.guide_item_text,'	',''),4,len(replace(r.guide_item_text,'	','')))
+			when replace(r.guide_item_text,'	','') like '[0-9][0-9]) %' then substring(replace(r.guide_item_text,'	',''),5,len(replace(r.guide_item_text,'	','')))
+			else replace(r.guide_item_text,'	','')
+			end
+			=
+			case 
+			when replace(a.val,'	','') like '[0-9]) %' then substring(replace(a.val,'	',''),4,len(replace(a.val,'	','')))
+			when replace(a.val,'	','') like '[0-9][0-9]) %' then substring(replace(a.val,'	',''),5,len(replace(a.val,'	','')))
+			else replace(a.val,'	','')
+			end
+			--replaces tabs and ensures old guidesheet_text values without preceding digits still match
+    where
+        1=1
+		--and r.string in (
+		--	'Food handlers do not have valid food handler permits. (no permits) CORRECTED ON SITE.'
+		--	,'Food handlers without a valid food handler permit or certificate of completion of an approved food handler course are being allowed to handle food that is served to the public. (some dude without a permit was serving food) REPEAT.'
+		--)
+        and r.serv_prov_code = 'DAVISCO'
+        and r.string is not null
+        and exists (
+            select 1
+            from _resultt
+            where
+                1=1
+                and sub_cat = a.sub_cat
+        )
+        and (
+            a.val = a.sub_cat 
+            or r.sub_cat is not null
+        )
+)
+--select * from _resultt
+--select * from resultt
+
+--, almost_there as (
+insert into @almost_there
+select 
+	ROW_NUMBER() over (order by 
+		r.guide_type
+		,_sort_order
+		, idx
+		, case 
+			when toPrint like 'Violation: %' then 1 
+			when toPrint like 'Comment: %' then 2 
+			else 0 
+	end) rownum
+	,GUIDE_TYPE
+	,toPrint 
+	,guide_item_status 
+	,isBroaderCat
+	,isSubcatHeader
+	--,'rrrr' [r]
+	--,r.*
+from resultt r 
+order by r._sort_order
+;
+
+select
+	 curRow.rownum idx
+	,curRow.GUIDE_TYPE
+	,curRow.toPrint as toPrint
+	,curRow.guide_item_status
+	,curRow.isBroaderCat 
+	,curRow.isSubcatHeader
+	,(case when curRow.toPrint like 'Violation:%' and nextRow.toPrint like 'Violation:%' then 1 else 0 end) as isViolation_hideBottomBorder
+	,(case when curRow.toPrint like 'Violation:%' and prevRow.toPrint like 'Violation:%' then 1 else 0 end) as isViolation_hideTopBorder
+from @almost_there curRow
+left join @almost_there prevRow on prevRow.rownum = curRow.rownum-1
+left join @almost_there nextRow on nextRow.rownum = curRow.rownum+1
+order by curRow.rownum</CommandText>
+        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
+      </Query>
+      <Fields>
+        <Field Name="idx">
+          <DataField>idx</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="GUIDE_TYPE">
+          <DataField>GUIDE_TYPE</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="toPrint">
+          <DataField>toPrint</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="guide_item_status">
+          <DataField>guide_item_status</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="isBroaderCat">
+          <DataField>isBroaderCat</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="isSubcatHeader">
+          <DataField>isSubcatHeader</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="isViolation_hideBottomBorder">
+          <DataField>isViolation_hideBottomBorder</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="isViolation_hideTopBorder">
+          <DataField>isViolation_hideTopBorder</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="overall_header">
+      <Query>
+        <DataSourceName>davis</DataSourceName>
+        <QueryParameters>
+          <QueryParameter Name="@inspection_id">
+            <Value>=Parameters!inspection_id.Value</Value>
+          </QueryParameter>
+        </QueryParameters>
+        <CommandText>--If a header is in display order 1, and another header is in display order 2,
+-- then display order 1 must be an overall header aka name of the checklist.
+-- why did I conclude this: the example in the mockup fulfilled the above condition.
+;with _headerA as (
+	select
+		SERV_PROV_CODE
+		,guide_type
+		,guide_item_display_order 
+		,guide_item_text
+	from RGUIDESHEET_item with(nolock)
+	where
+		1=1
+		and SERV_PROV_CODE = 'DAVISCO'
+		and GUIDE_ITEM_DISPLAY_ORDER = 1
+		and GUIDE_ITEM_STATUS_VISIBLE is null --this is what we are using to discern what is a header and what isnt
+)
+, _headerB as (
+	select
+		SERV_PROV_CODE
+		,guide_type
+		,guide_item_display_order 
+		,guide_item_text
+	from RGUIDESHEET_item with(nolock)
+	where
+		1=1
+		and SERV_PROV_CODE = 'DAVISCO'
+		and GUIDE_ITEM_DISPLAY_ORDER = 2
+		and GUIDE_ITEM_STATUS_VISIBLE is null --this is what we are using to discern what is a header and what isnt
+		--and guide_type = 'mobile food'
+)
+select top 1
+	a.GUIDE_ITEM_TEXT as overall_header
+from _headerA a 
+join _headerB b on b.guide_type = a.guide_type
+join gguidesheet_item gi on gi.serv_prov_code = a.SERV_PROV_CODE and gi.guide_type = a.GUIDE_TYPE
+join GGUIDESHEET g on g.SERV_PROV_CODE = a.SERV_PROV_CODE and g.GUIDESHEET_SEQ_NBR = gi.guidesheet_seq_nbr
+where
+	1=1
+	and g.G6_ACT_NUM = @inspection_id</CommandText>
+        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
+      </Query>
+      <Fields>
+        <Field Name="overall_header">
+          <DataField>overall_header</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <ReportSections>
+    <ReportSection>
+      <Body>
+        <ReportItems>
+          <Image Name="logo">
+            <Source>Database</Source>
+            <Value>=First(Fields!LOGO_CONTENT.Value, "logo")</Value>
+            <MIMEType>image/png</MIMEType>
+            <Sizing>FitProportional</Sizing>
+            <Height>0.88in</Height>
+            <Width>3.18004in</Width>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Image>
+          <Textbox Name="ReportTitle">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>Physical: </Value>
+                    <Style>
+                      <FontStyle>Normal</FontStyle>
+                      <FontFamily>Arial</FontFamily>
+                      <FontSize>11pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                      <TextDecoration>None</TextDecoration>
+                      <Color>#a09c98</Color>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Label>physical_address</Label>
+                    <Value>=Lookup("physical_address", Fields!key.Value, Fields!value.Value, "physical_mailing_url__header")</Value>
+                    <Style>
+                      <FontStyle>Normal</FontStyle>
+                      <FontFamily>Arial</FontFamily>
+                      <FontSize>11pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                      <TextDecoration>None</TextDecoration>
+                      <Color>#a09c98</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <SpaceBefore>1.8pt</SpaceBefore>
+                <SpaceAfter>1.8pt</SpaceAfter>
+                <Style>
+                  <TextAlign>Right</TextAlign>
+                </Style>
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>Mailing: </Value>
+                    <Style>
+                      <FontStyle>Normal</FontStyle>
+                      <FontFamily>Arial</FontFamily>
+                      <FontSize>11pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                      <TextDecoration>None</TextDecoration>
+                      <Color>#a09c98</Color>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Label>mailing_address</Label>
+                    <Value>=Lookup("mailing_address", Fields!key.Value, Fields!value.Value, "physical_mailing_url__header")</Value>
+                    <Style>
+                      <FontStyle>Normal</FontStyle>
+                      <FontFamily>Arial</FontFamily>
+                      <FontSize>11pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                      <TextDecoration>None</TextDecoration>
+                      <Color>#a09c98</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <SpaceBefore>1.8pt</SpaceBefore>
+                <SpaceAfter>1.8pt</SpaceAfter>
+                <Style>
+                  <TextAlign>Right</TextAlign>
+                </Style>
+              </Paragraph>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Label>url</Label>
+                    <Value>=Lookup("url", Fields!key.Value, Fields!value.Value, "physical_mailing_url__header")</Value>
+                    <Style>
+                      <FontStyle>Normal</FontStyle>
+                      <FontFamily>Arial</FontFamily>
+                      <FontSize>11pt</FontSize>
+                      <FontWeight>Normal</FontWeight>
+                      <TextDecoration>None</TextDecoration>
+                      <Color>#a09c98</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <SpaceBefore>1.8pt</SpaceBefore>
+                <SpaceAfter>1.8pt</SpaceAfter>
+                <Style>
+                  <TextAlign>Right</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <rd:WatermarkTextbox>Title</rd:WatermarkTextbox>
+            <rd:DefaultName>ReportTitle</rd:DefaultName>
+            <Top>0.05198in</Top>
+            <Left>3.45678in</Left>
+            <Height>0.71in</Height>
+            <Width>4.03322in</Width>
+            <ZIndex>1</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
+          <Line Name="Line1">
+            <Top>0.80294in</Top>
+            <Left>4.1965in</Left>
+            <Height>0in</Height>
+            <Width>3.2935in</Width>
+            <ZIndex>2</ZIndex>
+            <Style>
+              <Border>
+                <Color>#0076bd</Color>
+                <Style>Solid</Style>
+                <Width>3pt</Width>
+              </Border>
+            </Style>
+          </Line>
+          <Rectangle Name="Rectangle2">
+            <ReportItems>
+              <Textbox Name="Textbox1">
+                <CanGrow>true</CanGrow>
+                <KeepTogether>true</KeepTogether>
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Label>[report_title]</Label>
+                        <Value>=First(Fields!report_title.Value, "top_block")</Value>
+                        <Style>
+                          <FontFamily>Arial</FontFamily>
+                          <FontSize>13pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                    <Style>
+                      <TextAlign>Center</TextAlign>
+                    </Style>
+                  </Paragraph>
+                </Paragraphs>
+                <rd:DefaultName>Textbox1</rd:DefaultName>
+                <Left>0.50133in</Left>
+                <Height>0.25in</Height>
+                <Width>6.50841in</Width>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                  <PaddingLeft>2pt</PaddingLeft>
+                  <PaddingRight>2pt</PaddingRight>
+                  <PaddingTop>2pt</PaddingTop>
+                  <PaddingBottom>2pt</PaddingBottom>
+                </Style>
+              </Textbox>
+              <Textbox Name="Textbox13">
+                <CanGrow>true</CanGrow>
+                <KeepTogether>true</KeepTogether>
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Label>[overall_header]</Label>
+                        <Value>=First(Fields!overall_header.Value, "overall_header")</Value>
+                        <Style>
+                          <FontFamily>Arial</FontFamily>
+                          <FontSize>13pt</FontSize>
+                          <FontWeight>Bold</FontWeight>
+                          <Color>White</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                    <Style>
+                      <TextAlign>Center</TextAlign>
+                    </Style>
+                  </Paragraph>
+                </Paragraphs>
+                <rd:DefaultName>Textbox13</rd:DefaultName>
+                <Top>1.61612in</Top>
+                <Height>0.25in</Height>
+                <Width>7.49in</Width>
+                <ZIndex>1</ZIndex>
+                <Style>
+                  <Border>
+                    <Style>Solid</Style>
+                  </Border>
+                  <BackgroundColor>Gray</BackgroundColor>
+                  <PaddingLeft>2pt</PaddingLeft>
+                  <PaddingRight>2pt</PaddingRight>
+                  <PaddingTop>2pt</PaddingTop>
+                  <PaddingBottom>2pt</PaddingBottom>
+                </Style>
+              </Textbox>
+              <Tablix Name="Tablix7">
+                <TablixBody>
+                  <TablixColumns>
+                    <TablixColumn>
+                      <Width>4.96123in</Width>
+                    </TablixColumn>
+                    <TablixColumn>
+                      <Width>2.52878in</Width>
+                    </TablixColumn>
+                  </TablixColumns>
+                  <TablixRows>
+                    <TablixRow>
+                      <Height>0.25in</Height>
+                      <TablixCells>
+                        <TablixCell>
+                          <CellContents>
+                            <Textbox Name="toPrint1">
+                              <CanGrow>true</CanGrow>
+                              <KeepTogether>true</KeepTogether>
+                              <Paragraphs>
+                                <Paragraph>
+                                  <TextRuns>
+                                    <TextRun>
+                                      <Label>[toPrint - isBroadCat=1]</Label>
+                                      <Value>=Fields!toPrint.Value</Value>
+                                      <Style>
+                                        <FontFamily>Arial</FontFamily>
+                                        <FontSize>12pt</FontSize>
+                                        <FontWeight>Bold</FontWeight>
+                                        <Color>White</Color>
+                                      </Style>
+                                    </TextRun>
+                                  </TextRuns>
+                                  <Style>
+                                    <TextAlign>Center</TextAlign>
+                                  </Style>
+                                </Paragraph>
+                              </Paragraphs>
+                              <rd:DefaultName>toPrint1</rd:DefaultName>
+                              <Style>
+                                <Border>
+                                  <Style>Solid</Style>
+                                </Border>
+                                <BackgroundColor>Gray</BackgroundColor>
+                                <PaddingLeft>2pt</PaddingLeft>
+                                <PaddingRight>2pt</PaddingRight>
+                                <PaddingTop>2pt</PaddingTop>
+                                <PaddingBottom>2pt</PaddingBottom>
+                              </Style>
+                            </Textbox>
+                            <ColSpan>2</ColSpan>
+                          </CellContents>
+                        </TablixCell>
+                        <TablixCell />
+                      </TablixCells>
+                    </TablixRow>
+                    <TablixRow>
+                      <Height>0.25in</Height>
+                      <TablixCells>
+                        <TablixCell>
+                          <CellContents>
+                            <Textbox Name="Textbox64">
+                              <CanGrow>true</CanGrow>
+                              <KeepTogether>true</KeepTogether>
+                              <Paragraphs>
+                                <Paragraph>
+                                  <TextRuns>
+                                    <TextRun>
+                                      <Label>[toPrint - isSubCat=1]</Label>
+                                      <Value>=Fields!toPrint.Value</Value>
+                                      <Style>
+                                        <FontFamily>Arial</FontFamily>
+                                        <FontSize>12pt</FontSize>
+                                        <FontWeight>=Iif(Fields!isSubcatHeader.Value=1,"Bold","Default")</FontWeight>
+                                      </Style>
+                                    </TextRun>
+                                  </TextRuns>
+                                  <Style>
+                                    <TextAlign>Center</TextAlign>
+                                  </Style>
+                                </Paragraph>
+                              </Paragraphs>
+                              <rd:DefaultName>Textbox64</rd:DefaultName>
+                              <Style>
+                                <Border>
+                                  <Style>Solid</Style>
+                                </Border>
+                                <BackgroundColor>LightGrey</BackgroundColor>
+                                <PaddingLeft>2pt</PaddingLeft>
+                                <PaddingRight>2pt</PaddingRight>
+                                <PaddingTop>2pt</PaddingTop>
+                                <PaddingBottom>2pt</PaddingBottom>
+                              </Style>
+                            </Textbox>
+                            <ColSpan>2</ColSpan>
+                          </CellContents>
+                        </TablixCell>
+                        <TablixCell />
+                      </TablixCells>
+                    </TablixRow>
+                    <TablixRow>
+                      <Height>0.25in</Height>
+                      <TablixCells>
+                        <TablixCell>
+                          <CellContents>
+                            <Textbox Name="toPrint">
+                              <CanGrow>true</CanGrow>
+                              <KeepTogether>true</KeepTogether>
+                              <Paragraphs>
+                                <Paragraph>
+                                  <TextRuns>
+                                    <TextRun>
+                                      <Label>[toPrint - if is beside guide_item_status]</Label>
+                                      <Value>=Replace(
+    IIF(
+        Left(Fields!toPrint.Value, 10) = "Violation:"
+        ,"&lt;b&gt;Violation:&lt;/b&gt; " &amp; Mid(Fields!toPrint.Value, 11)
+        ,IIF(
+            Left(Fields!toPrint.Value, 8) = "Comment:"
+            ,"&lt;b&gt;Comment:&lt;/b&gt; " &amp; Mid(Fields!toPrint.Value, 9)
+            ,Fields!toPrint.Value
+        )
+    )
+    ,"||||"
+    ,"&lt;br&gt;&lt;br&gt;"
+)</Value>
+                                      <MarkupType>HTML</MarkupType>
+                                      <Style>
+                                        <FontFamily>Arial</FontFamily>
+                                        <FontSize>12pt</FontSize>
+                                        <FontWeight>=Iif(Fields!isSubcatHeader.Value=1,"Bold","Default")</FontWeight>
+                                      </Style>
+                                    </TextRun>
+                                  </TextRuns>
+                                  <Style>
+                                    <TextAlign>Left</TextAlign>
+                                  </Style>
+                                </Paragraph>
+                              </Paragraphs>
+                              <rd:DefaultName>toPrint</rd:DefaultName>
+                              <Style>
+                                <Border>
+                                  <Style>Solid</Style>
+                                </Border>
+                                <RightBorder>
+                                  <Style>None</Style>
+                                </RightBorder>
+                                <PaddingLeft>2pt</PaddingLeft>
+                                <PaddingRight>2pt</PaddingRight>
+                                <PaddingTop>2pt</PaddingTop>
+                                <PaddingBottom>2pt</PaddingBottom>
+                              </Style>
+                            </Textbox>
+                          </CellContents>
+                        </TablixCell>
+                        <TablixCell>
+                          <CellContents>
+                            <Textbox Name="guide_item_status">
+                              <CanGrow>true</CanGrow>
+                              <KeepTogether>true</KeepTogether>
+                              <Paragraphs>
+                                <Paragraph>
+                                  <TextRuns>
+                                    <TextRun>
+                                      <Value>=Fields!guide_item_status.Value</Value>
+                                      <Style>
+                                        <FontFamily>Arial</FontFamily>
+                                        <FontSize>12pt</FontSize>
+                                        <Color>=IIF(Fields!guide_item_status.Value = "OUT OF COMPLIANCE", "Red", "Black")</Color>
+                                      </Style>
+                                    </TextRun>
+                                  </TextRuns>
+                                  <Style>
+                                    <TextAlign>Right</TextAlign>
+                                  </Style>
+                                </Paragraph>
+                              </Paragraphs>
+                              <rd:DefaultName>guide_item_status</rd:DefaultName>
+                              <Style>
+                                <Border>
+                                  <Style>Solid</Style>
+                                </Border>
+                                <LeftBorder>
+                                  <Style>None</Style>
+                                </LeftBorder>
+                                <PaddingLeft>2pt</PaddingLeft>
+                                <PaddingRight>2pt</PaddingRight>
+                                <PaddingTop>2pt</PaddingTop>
+                                <PaddingBottom>2pt</PaddingBottom>
+                              </Style>
+                            </Textbox>
+                          </CellContents>
+                        </TablixCell>
+                      </TablixCells>
+                    </TablixRow>
+                    <TablixRow>
+                      <Height>0.25in</Height>
+                      <TablixCells>
+                        <TablixCell>
+                          <CellContents>
+                            <Textbox Name="Textbox78">
+                              <CanGrow>true</CanGrow>
+                              <KeepTogether>true</KeepTogether>
+                              <Paragraphs>
+                                <Paragraph>
+                                  <TextRuns>
+                                    <TextRun>
+                                      <Label>[toPrint - if is a "violation:" or "comment:"</Label>
+                                      <Value>=Replace(
+    IIF(
+        Left(Fields!toPrint.Value, 10) = "Violation:"
+        ,"&lt;b&gt;Violation:&lt;/b&gt; " &amp; Mid(Fields!toPrint.Value, 11)
+        ,IIF(
+            Left(Fields!toPrint.Value, 8) = "Comment:"
+            ,"&lt;b&gt;Comment:&lt;/b&gt; " &amp; Mid(Fields!toPrint.Value, 9)
+            ,Fields!toPrint.Value
+        )
+    )
+    ,"||||"
+    ,"&lt;br&gt;&lt;br&gt;"
+)</Value>
+                                      <MarkupType>HTML</MarkupType>
+                                      <Style>
+                                        <FontFamily>Arial</FontFamily>
+                                        <FontSize>=Iif(Fields!isSubcatHeader.Value=1,"11pt","9pt")</FontSize>
+                                        <FontWeight>=Iif(Fields!isSubcatHeader.Value=1,"Bold","Default")</FontWeight>
+                                      </Style>
+                                    </TextRun>
+                                  </TextRuns>
+                                  <Style>
+                                    <TextAlign>Left</TextAlign>
+                                  </Style>
+                                </Paragraph>
+                              </Paragraphs>
+                              <rd:DefaultName>Textbox78</rd:DefaultName>
+                              <Style>
+                                <Border>
+                                  <Style>Solid</Style>
+                                </Border>
+                                <TopBorder>
+                                  <Style>=iif(
+    Fields!isViolation_hideTopBorder.Value=1
+    ,"None"
+    ,"Default"
+)</Style>
+                                </TopBorder>
+                                <BottomBorder>
+                                  <Style>=iif(
+    Fields!isViolation_hideBottomBorder.Value=1
+    ,"None"
+    ,"Default"
+)</Style>
+                                </BottomBorder>
+                                <LeftBorder>
+                                  <Style>Solid</Style>
+                                </LeftBorder>
+                                <RightBorder>
+                                  <Style>Solid</Style>
+                                </RightBorder>
+                                <BackgroundColor>=IIF(Fields!isSubcatHeader.Value = "1", "LightGrey", "Transparent")</BackgroundColor>
+                                <PaddingLeft>2pt</PaddingLeft>
+                                <PaddingRight>2pt</PaddingRight>
+                                <PaddingTop>2pt</PaddingTop>
+                                <PaddingBottom>2pt</PaddingBottom>
+                              </Style>
+                            </Textbox>
+                            <ColSpan>2</ColSpan>
+                          </CellContents>
+                        </TablixCell>
+                        <TablixCell />
+                      </TablixCells>
+                    </TablixRow>
+                  </TablixRows>
+                </TablixBody>
+                <TablixColumnHierarchy>
+                  <TablixMembers>
+                    <TablixMember />
+                    <TablixMember />
+                  </TablixMembers>
+                </TablixColumnHierarchy>
+                <TablixRowHierarchy>
+                  <TablixMembers>
+                    <TablixMember>
+                      <Group Name="Details" />
+                      <TablixMembers>
+                        <TablixMember>
+                          <Visibility>
+                            <Hidden>=iif(
+    Fields!isBroaderCat.Value=1
+    ,iif(
+        First(Fields!overall_header.Value, "overall_header") = Fields!toPrint.Value
+        ,True
+        ,False
+    )
+    ,True
+)</Hidden>
+                          </Visibility>
+                        </TablixMember>
+                        <TablixMember>
+                          <Visibility>
+                            <Hidden>=iif(Fields!isSubcatHeader.Value=1,False,True)</Hidden>
+                          </Visibility>
+                        </TablixMember>
+                        <TablixMember>
+                          <Visibility>
+                            <Hidden>=IIF(
+    iif(isNothing(Fields!guide_item_status.Value),"",Fields!guide_item_status.Value) &lt;&gt; ""
+    
+    ,False
+    ,True
+)</Hidden>
+                          </Visibility>
+                        </TablixMember>
+                        <TablixMember>
+                          <Visibility>
+                            <Hidden>=IIF(
+    Fields!isSubcatHeader.Value + Fields!isBroaderCat.Value = 0 
+    AND
+    iif(isNothing(Fields!guide_item_status.Value),"",Fields!guide_item_status.Value) = ""
+    
+    ,False
+    ,True
+)</Hidden>
+                          </Visibility>
+                        </TablixMember>
+                      </TablixMembers>
+                    </TablixMember>
+                  </TablixMembers>
+                </TablixRowHierarchy>
+                <DataSetName>guidesheet_data</DataSetName>
+                <Top>1.86612in</Top>
+                <Height>1in</Height>
+                <Width>7.49001in</Width>
+                <ZIndex>2</ZIndex>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Tablix>
+              <Textbox Name="Textbox14">
+                <CanGrow>true</CanGrow>
+                <KeepTogether>true</KeepTogether>
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>Overall Inspection Comments</Value>
+                        <Style>
+                          <FontFamily>Arial</FontFamily>
+                          <FontWeight>Bold</FontWeight>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                    <Style>
+                      <TextAlign>Center</TextAlign>
+                    </Style>
+                  </Paragraph>
+                </Paragraphs>
+                <rd:DefaultName>Textbox13</rd:DefaultName>
+                <Top>2.86612in</Top>
+                <Height>0.21457in</Height>
+                <Width>7.49in</Width>
+                <ZIndex>3</ZIndex>
+                <Style>
+                  <Border>
+                    <Style>Solid</Style>
+                  </Border>
+                  <BackgroundColor>LightGrey</BackgroundColor>
+                  <PaddingLeft>2pt</PaddingLeft>
+                  <PaddingRight>2pt</PaddingRight>
+                  <PaddingTop>2pt</PaddingTop>
+                  <PaddingBottom>2pt</PaddingBottom>
+                </Style>
+              </Textbox>
+              <Textbox Name="Textbox82">
+                <CanGrow>true</CanGrow>
+                <KeepTogether>true</KeepTogether>
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Label>[overall_inspection_comments]</Label>
+                        <Value>=first(Fields!overall_inspection_comments.Value,"top_block")</Value>
+                        <Style>
+                          <FontFamily>Arial</FontFamily>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                    <Style />
+                  </Paragraph>
+                </Paragraphs>
+                <rd:DefaultName>Textbox82</rd:DefaultName>
+                <Top>3.08069in</Top>
+                <Height>0.63941in</Height>
+                <Width>7.49in</Width>
+                <ZIndex>4</ZIndex>
+                <Style>
+                  <Border>
+                    <Style>Solid</Style>
+                  </Border>
+                  <PaddingLeft>2pt</PaddingLeft>
+                  <PaddingRight>2pt</PaddingRight>
+                  <PaddingTop>2pt</PaddingTop>
+                  <PaddingBottom>2pt</PaddingBottom>
+                </Style>
+              </Textbox>
+              <Textbox Name="Textbox15">
+                <CanGrow>true</CanGrow>
+                <KeepTogether>true</KeepTogether>
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value />
+                        <Style>
+                          <FontWeight>Bold</FontWeight>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                    <Style>
+                      <TextAlign>Center</TextAlign>
+                    </Style>
+                  </Paragraph>
+                </Paragraphs>
+                <rd:DefaultName>Textbox13</rd:DefaultName>
+                <Top>3.7201in</Top>
+                <Height>0.25in</Height>
+                <Width>7.49in</Width>
+                <ZIndex>5</ZIndex>
+                <Style>
+                  <Border>
+                    <Style>Solid</Style>
+                  </Border>
+                  <BackgroundColor>Gray</BackgroundColor>
+                  <PaddingLeft>2pt</PaddingLeft>
+                  <PaddingRight>2pt</PaddingRight>
+                  <PaddingTop>2pt</PaddingTop>
+                  <PaddingBottom>2pt</PaddingBottom>
+                </Style>
+              </Textbox>
+              <Textbox Name="Textbox86">
+                <CanGrow>true</CanGrow>
+                <KeepTogether>true</KeepTogether>
+                <Paragraphs>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value>This inspection report is provided as notice to the permit holder of violations that must be corrected,</Value>
+                        <Style>
+                          <FontStyle>Normal</FontStyle>
+                          <FontFamily>Arial Narrow</FontFamily>
+                          <FontSize>9pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <TextDecoration>None</TextDecoration>
+                          <Color>#000000</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                    <Style>
+                      <TextAlign>Center</TextAlign>
+                    </Style>
+                  </Paragraph>
+                  <Paragraph>
+                    <TextRuns>
+                      <TextRun>
+                        <Value> but does not serve as an agreement of the findings.</Value>
+                        <Style>
+                          <FontStyle>Normal</FontStyle>
+                          <FontFamily>Arial Narrow</FontFamily>
+                          <FontSize>9pt</FontSize>
+                          <FontWeight>Normal</FontWeight>
+                          <TextDecoration>None</TextDecoration>
+                          <Color>#000000</Color>
+                        </Style>
+                      </TextRun>
+                    </TextRuns>
+                    <Style>
+                      <TextAlign>Center</TextAlign>
+                    </Style>
+                  </Paragraph>
+                </Paragraphs>
+                <rd:DefaultName>Textbox86</rd:DefaultName>
+                <Top>3.9701in</Top>
+                <Height>0.40432in</Height>
+                <Width>7.49in</Width>
+                <ZIndex>6</ZIndex>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                  <PaddingLeft>2pt</PaddingLeft>
+                  <PaddingRight>2pt</PaddingRight>
+                  <PaddingTop>2pt</PaddingTop>
+                  <PaddingBottom>2pt</PaddingBottom>
+                </Style>
+              </Textbox>
+              <Tablix Name="Tablix1">
+                <TablixBody>
+                  <TablixColumns>
+                    <TablixColumn>
+                      <Width>1.90214in</Width>
+                    </TablixColumn>
+                    <TablixColumn>
+                      <Width>3.29095in</Width>
+                    </TablixColumn>
+                  </TablixColumns>
+                  <TablixRows>
+                    <TablixRow>
+                      <Height>0.225in</Height>
+                      <TablixCells>
+                        <TablixCell>
+                          <CellContents>
+                            <Textbox Name="Textbox18">
+                              <CanGrow>true</CanGrow>
+                              <KeepTogether>true</KeepTogether>
+                              <Paragraphs>
+                                <Paragraph>
+                                  <TextRuns>
+                                    <TextRun>
+                                      <Value>PERMITTED ENTITY</Value>
+                                      <Style>
+                                        <FontFamily>Arial</FontFamily>
+                                        <FontWeight>Bold</FontWeight>
+                                      </Style>
+                                    </TextRun>
+                                  </TextRuns>
+                                  <Style />
+                                </Paragraph>
+                              </Paragraphs>
+                              <rd:DefaultName>Textbox18</rd:DefaultName>
+                              <Style>
+                                <Border>
+                                  <Color>LightGrey</Color>
+                                  <Style>Solid</Style>
+                                </Border>
+                                <TopBorder>
+                                  <Color>Black</Color>
+                                </TopBorder>
+                                <BottomBorder>
+                                  <Style>None</Style>
+                                </BottomBorder>
+                                <LeftBorder>
+                                  <Color>Black</Color>
+                                </LeftBorder>
+                                <RightBorder>
+                                  <Style>None</Style>
+                                </RightBorder>
+                                <PaddingLeft>2pt</PaddingLeft>
+                                <PaddingTop>2pt</PaddingTop>
+                              </Style>
+                            </Textbox>
+                          </CellContents>
+                        </TablixCell>
+                        <TablixCell>
+                          <CellContents>
+                            <Textbox Name="Textbox41">
+                              <CanGrow>true</CanGrow>
+                              <KeepTogether>true</KeepTogether>
+                              <Paragraphs>
+                                <Paragraph>
+                                  <TextRuns>
+                                    <TextRun>
+                                      <Label>[permittedEntity_topRight]</Label>
+                                      <Value>=First(Fields!permittedEntity_topRight.Value, "top_block")</Value>
+                                      <Style>
+                                        <FontFamily>Arial</FontFamily>
+                                        <FontWeight>Normal</FontWeight>
+                                      </Style>
+                                    </TextRun>
+                                  </TextRuns>
+                                  <Style>
+                                    <TextAlign>Right</TextAlign>
+                                  </Style>
+                                </Paragraph>
+                              </Paragraphs>
+                              <rd:DefaultName>Textbox41</rd:DefaultName>
+                              <Style>
+                                <Border>
+                                  <Color>LightGrey</Color>
+                                  <Style>Solid</Style>
+                                </Border>
+                                <TopBorder>
+                                  <Color>Black</Color>
+                                </TopBorder>
+                                <BottomBorder>
+                                  <Style>None</Style>
+                                </BottomBorder>
+                                <LeftBorder>
+                                  <Style>None</Style>
+                                </LeftBorder>
+                                <RightBorder>
+                                  <Color>Black</Color>
+                                </RightBorder>
+                                <PaddingRight>2pt</PaddingRight>
+                                <PaddingTop>2pt</PaddingTop>
+                              </Style>
+                            </Textbox>
+                          </CellContents>
+                        </TablixCell>
+                      </TablixCells>
+                    </TablixRow>
+                    <TablixRow>
+                      <Height>0.225in</Height>
+                      <TablixCells>
+                        <TablixCell>
+                          <CellContents>
+                            <Textbox Name="Textbox30">
+                              <CanGrow>true</CanGrow>
+                              <KeepTogether>true</KeepTogether>
+                              <Paragraphs>
+                                <Paragraph>
+                                  <TextRuns>
+                                    <TextRun>
+                                      <Label>[Establishment_name]</Label>
+                                      <Value>=first(Fields!Establishment_name.Value,"top_block")</Value>
+                                      <Style>
+                                        <FontFamily>Arial</FontFamily>
+                                      </Style>
+                                    </TextRun>
+                                  </TextRuns>
+                                  <Style />
+                                </Paragraph>
+                              </Paragraphs>
+                              <rd:DefaultName>Textbox30</rd:DefaultName>
+                              <Style>
+                                <Border>
+                                  <Color>LightGrey</Color>
+                                  <Style>Solid</Style>
+                                </Border>
+                                <TopBorder>
+                                  <Style>None</Style>
+                                </TopBorder>
+                                <BottomBorder>
+                                  <Color>Black</Color>
+                                </BottomBorder>
+                                <LeftBorder>
+                                  <Color>Black</Color>
+                                </LeftBorder>
+                                <RightBorder>
+                                  <Color>Black</Color>
+                                </RightBorder>
+                                <PaddingLeft>2pt</PaddingLeft>
+                                <PaddingBottom>2pt</PaddingBottom>
+                              </Style>
+                            </Textbox>
+                            <ColSpan>2</ColSpan>
+                          </CellContents>
+                        </TablixCell>
+                        <TablixCell />
+                      </TablixCells>
+                    </TablixRow>
+                    <TablixRow>
+                      <Height>0.225in</Height>
+                      <TablixCells>
+                        <TablixCell>
+                          <CellContents>
+                            <Textbox Name="Textbox27">
+                              <CanGrow>true</CanGrow>
+                              <KeepTogether>true</KeepTogether>
+                              <Paragraphs>
+                                <Paragraph>
+                                  <TextRuns>
+                                    <TextRun>
+                                      <Value>ADDRESS</Value>
+                                      <Style>
+                                        <FontFamily>Arial</FontFamily>
+                                        <FontWeight>Bold</FontWeight>
+                                      </Style>
+                                    </TextRun>
+                                  </TextRuns>
+                                  <Style />
+                                </Paragraph>
+                              </Paragraphs>
+                              <rd:DefaultName>Textbox27</rd:DefaultName>
+                              <Style>
+                                <Border>
+                                  <Color>LightGrey</Color>
+                                  <Style>Solid</Style>
+                                </Border>
+                                <TopBorder>
+                                  <Color>Black</Color>
+                                </TopBorder>
+                                <BottomBorder>
+                                  <Style>None</Style>
+                                </BottomBorder>
+                                <LeftBorder>
+                                  <Color>Black</Color>
+                                </LeftBorder>
+                                <RightBorder>
+                                  <Color>Black</Color>
+                                </RightBorder>
+                                <PaddingLeft>2pt</PaddingLeft>
+                                <PaddingTop>2pt</PaddingTop>
+                              </Style>
+                            </Textbox>
+                            <ColSpan>2</ColSpan>
+                          </CellContents>
+                        </TablixCell>
+                        <TablixCell />
+                      </TablixCells>
+                    </TablixRow>
+                    <TablixRow>
+                      <Height>0.225in</Height>
+                      <TablixCells>
+                        <TablixCell>
+                          <CellContents>
+                            <Textbox Name="Textbox45">
+                              <CanGrow>true</CanGrow>
+                              <KeepTogether>true</KeepTogether>
+                              <Paragraphs>
+                                <Paragraph>
+                                  <TextRuns>
+                                    <TextRun>
+                                      <Label>[ADDR_FULL_LINE]</Label>
+                                      <Value>=first(Fields!ADDR_FULL_LINE.Value,"top_block")</Value>
+                                      <Style>
+                                        <FontFamily>Arial</FontFamily>
+                                      </Style>
+                                    </TextRun>
+                                  </TextRuns>
+                                  <Style />
+                                </Paragraph>
+                              </Paragraphs>
+                              <rd:DefaultName>Textbox45</rd:DefaultName>
+                              <Style>
+                                <Border>
+                                  <Color>LightGrey</Color>
+                                  <Style>Solid</Style>
+                                </Border>
+                                <TopBorder>
+                                  <Style>None</Style>
+                                </TopBorder>
+                                <BottomBorder>
+                                  <Color>Black</Color>
+                                </BottomBorder>
+                                <LeftBorder>
+                                  <Color>Black</Color>
+                                </LeftBorder>
+                                <RightBorder>
+                                  <Color>Black</Color>
+                                </RightBorder>
+                                <PaddingLeft>2pt</PaddingLeft>
+                                <PaddingBottom>2pt</PaddingBottom>
+                              </Style>
+                            </Textbox>
+                            <ColSpan>2</ColSpan>
+                          </CellContents>
+                        </TablixCell>
+                        <TablixCell />
+                      </TablixCells>
+                    </TablixRow>
+                    <TablixRow>
+                      <Height>0.225in</Height>
+                      <TablixCells>
+                        <TablixCell>
+                          <CellContents>
+                            <Textbox Name="Textbox24">
+                              <CanGrow>true</CanGrow>
+                              <KeepTogether>true</KeepTogether>
+                              <Paragraphs>
+                                <Paragraph>
+                                  <TextRuns>
+                                    <TextRun>
+                                      <Value>DATE OF INSPECTION</Value>
+                                      <Style>
+                                        <FontFamily>Arial</FontFamily>
+                                        <FontWeight>Bold</FontWeight>
+                                      </Style>
+                                    </TextRun>
+                                  </TextRuns>
+                                  <Style />
+                                </Paragraph>
+                              </Paragraphs>
+                              <rd:DefaultName>Textbox24</rd:DefaultName>
+                              <Style>
+                                <Border>
+                                  <Color>LightGrey</Color>
+                                  <Style>Solid</Style>
+                                </Border>
+                                <TopBorder>
+                                  <Color>Black</Color>
+                                </TopBorder>
+                                <BottomBorder>
+                                  <Style>None</Style>
+                                </BottomBorder>
+                                <LeftBorder>
+                                  <Color>Black</Color>
+                                </LeftBorder>
+                                <RightBorder>
+                                  <Style>None</Style>
+                                </RightBorder>
+                                <PaddingLeft>2pt</PaddingLeft>
+                                <PaddingTop>2pt</PaddingTop>
+                              </Style>
+                            </Textbox>
+                          </CellContents>
+                        </TablixCell>
+                        <TablixCell>
+                          <CellContents>
+                            <Textbox Name="Textbox25">
+                              <CanGrow>true</CanGrow>
+                              <KeepTogether>true</KeepTogether>
+                              <Paragraphs>
+                                <Paragraph>
+                                  <TextRuns>
+                                    <TextRun>
+                                      <Value>INSPECTION RESULT</Value>
+                                      <Style>
+                                        <FontFamily>Arial</FontFamily>
+                                        <FontWeight>Bold</FontWeight>
+                                      </Style>
+                                    </TextRun>
+                                  </TextRuns>
+                                  <Style>
+                                    <TextAlign>Right</TextAlign>
+                                  </Style>
+                                </Paragraph>
+                              </Paragraphs>
+                              <rd:DefaultName>Textbox24</rd:DefaultName>
+                              <Style>
+                                <Border>
+                                  <Color>LightGrey</Color>
+                                  <Style>Solid</Style>
+                                </Border>
+                                <TopBorder>
+                                  <Color>Black</Color>
+                                </TopBorder>
+                                <BottomBorder>
+                                  <Style>None</Style>
+                                </BottomBorder>
+                                <LeftBorder>
+                                  <Style>None</Style>
+                                </LeftBorder>
+                                <RightBorder>
+                                  <Color>Black</Color>
+                                </RightBorder>
+                                <PaddingLeft>2pt</PaddingLeft>
+                                <PaddingRight>2pt</PaddingRight>
+                                <PaddingTop>2pt</PaddingTop>
+                              </Style>
+                            </Textbox>
+                          </CellContents>
+                        </TablixCell>
+                      </TablixCells>
+                    </TablixRow>
+                    <TablixRow>
+                      <Height>0.225in</Height>
+                      <TablixCells>
+                        <TablixCell>
+                          <CellContents>
+                            <Textbox Name="Textbox50">
+                              <CanGrow>true</CanGrow>
+                              <KeepTogether>true</KeepTogether>
+                              <Paragraphs>
+                                <Paragraph>
+                                  <TextRuns>
+                                    <TextRun>
+                                      <Label>[inspection_result]</Label>
+                                      <Value>=first(Fields!inspection_date.Value,"top_block")</Value>
+                                      <Style>
+                                        <FontFamily>Arial</FontFamily>
+                                        <Format>MMMM d, yyyy</Format>
+                                      </Style>
+                                    </TextRun>
+                                  </TextRuns>
+                                  <Style>
+                                    <TextAlign>Left</TextAlign>
+                                  </Style>
+                                </Paragraph>
+                              </Paragraphs>
+                              <rd:DefaultName>Textbox50</rd:DefaultName>
+                              <Style>
+                                <Border>
+                                  <Color>LightGrey</Color>
+                                  <Style>Solid</Style>
+                                </Border>
+                                <TopBorder>
+                                  <Style>None</Style>
+                                </TopBorder>
+                                <BottomBorder>
+                                  <Color>Black</Color>
+                                </BottomBorder>
+                                <LeftBorder>
+                                  <Color>Black</Color>
+                                </LeftBorder>
+                                <RightBorder>
+                                  <Style>None</Style>
+                                </RightBorder>
+                                <PaddingLeft>2pt</PaddingLeft>
+                                <PaddingBottom>2pt</PaddingBottom>
+                              </Style>
+                            </Textbox>
+                          </CellContents>
+                        </TablixCell>
+                        <TablixCell>
+                          <CellContents>
+                            <Textbox Name="Textbox51">
+                              <CanGrow>true</CanGrow>
+                              <KeepTogether>true</KeepTogether>
+                              <Paragraphs>
+                                <Paragraph>
+                                  <TextRuns>
+                                    <TextRun>
+                                      <Label>[inspection_result]</Label>
+                                      <Value>=First(Fields!inspection_result.Value, "top_block")</Value>
+                                      <Style>
+                                        <FontFamily>Arial</FontFamily>
+                                      </Style>
+                                    </TextRun>
+                                  </TextRuns>
+                                  <Style>
+                                    <TextAlign>Right</TextAlign>
+                                  </Style>
+                                </Paragraph>
+                              </Paragraphs>
+                              <rd:DefaultName>Textbox50</rd:DefaultName>
+                              <Style>
+                                <Border>
+                                  <Color>LightGrey</Color>
+                                  <Style>Solid</Style>
+                                </Border>
+                                <TopBorder>
+                                  <Style>None</Style>
+                                </TopBorder>
+                                <BottomBorder>
+                                  <Color>Black</Color>
+                                </BottomBorder>
+                                <LeftBorder>
+                                  <Style>None</Style>
+                                </LeftBorder>
+                                <RightBorder>
+                                  <Color>Black</Color>
+                                </RightBorder>
+                                <PaddingLeft>2pt</PaddingLeft>
+                                <PaddingRight>2pt</PaddingRight>
+                                <PaddingBottom>2pt</PaddingBottom>
+                              </Style>
+                            </Textbox>
+                          </CellContents>
+                        </TablixCell>
+                      </TablixCells>
+                    </TablixRow>
+                  </TablixRows>
+                </TablixBody>
+                <TablixColumnHierarchy>
+                  <TablixMembers>
+                    <TablixMember />
+                    <TablixMember />
+                  </TablixMembers>
+                </TablixColumnHierarchy>
+                <TablixRowHierarchy>
+                  <TablixMembers>
+                    <TablixMember />
+                    <TablixMember />
+                    <TablixMember />
+                    <TablixMember />
+                    <TablixMember />
+                    <TablixMember />
+                  </TablixMembers>
+                </TablixRowHierarchy>
+                <DataSetName>logo</DataSetName>
+                <Top>0.26612in</Top>
+                <Height>1.35in</Height>
+                <Width>5.19309in</Width>
+                <ZIndex>7</ZIndex>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Tablix>
+              <Tablix Name="Tablix2">
+                <TablixBody>
+                  <TablixColumns>
+                    <TablixColumn>
+                      <Width>1.31808in</Width>
+                    </TablixColumn>
+                    <TablixColumn>
+                      <Width>0.97884in</Width>
+                    </TablixColumn>
+                  </TablixColumns>
+                  <TablixRows>
+                    <TablixRow>
+                      <Height>0.45in</Height>
+                      <TablixCells>
+                        <TablixCell>
+                          <CellContents>
+                            <Textbox Name="Textbox54">
+                              <CanGrow>true</CanGrow>
+                              <KeepTogether>true</KeepTogether>
+                              <Paragraphs>
+                                <Paragraph>
+                                  <TextRuns>
+                                    <TextRun>
+                                      <Value>Violation Counts</Value>
+                                      <Style>
+                                        <FontFamily>Arial</FontFamily>
+                                        <FontSize>9pt</FontSize>
+                                        <FontWeight>Bold</FontWeight>
+                                      </Style>
+                                    </TextRun>
+                                  </TextRuns>
+                                  <Style>
+                                    <TextAlign>Center</TextAlign>
+                                  </Style>
+                                </Paragraph>
+                              </Paragraphs>
+                              <rd:DefaultName>Textbox54</rd:DefaultName>
+                              <Style>
+                                <Border>
+                                  <Style>Solid</Style>
+                                </Border>
+                                <VerticalAlign>Middle</VerticalAlign>
+                                <PaddingLeft>2pt</PaddingLeft>
+                                <PaddingRight>2pt</PaddingRight>
+                              </Style>
+                            </Textbox>
+                            <ColSpan>2</ColSpan>
+                          </CellContents>
+                        </TablixCell>
+                        <TablixCell />
+                      </TablixCells>
+                    </TablixRow>
+                    <TablixRow>
+                      <Height>0.225in</Height>
+                      <TablixCells>
+                        <TablixCell>
+                          <CellContents>
+                            <Textbox Name="Textbox60">
+                              <CanGrow>true</CanGrow>
+                              <KeepTogether>true</KeepTogether>
+                              <Paragraphs>
+                                <Paragraph>
+                                  <TextRuns>
+                                    <TextRun>
+                                      <Value>Total</Value>
+                                      <Style>
+                                        <FontFamily>Arial</FontFamily>
+                                        <FontSize>9pt</FontSize>
+                                        <FontWeight>Bold</FontWeight>
+                                      </Style>
+                                    </TextRun>
+                                  </TextRuns>
+                                  <Style>
+                                    <TextAlign>Center</TextAlign>
+                                  </Style>
+                                </Paragraph>
+                              </Paragraphs>
+                              <rd:DefaultName>Textbox60</rd:DefaultName>
+                              <Style>
+                                <Border>
+                                  <Style>Solid</Style>
+                                </Border>
+                                <BackgroundColor>#e6e6e6</BackgroundColor>
+                                <VerticalAlign>Middle</VerticalAlign>
+                                <PaddingLeft>2pt</PaddingLeft>
+                                <PaddingRight>2pt</PaddingRight>
+                              </Style>
+                            </Textbox>
+                          </CellContents>
+                        </TablixCell>
+                        <TablixCell>
+                          <CellContents>
+                            <Textbox Name="Textbox61">
+                              <CanGrow>true</CanGrow>
+                              <KeepTogether>true</KeepTogether>
+                              <Paragraphs>
+                                <Paragraph>
+                                  <TextRuns>
+                                    <TextRun>
+                                      <Value>Major</Value>
+                                      <Style>
+                                        <FontFamily>Arial</FontFamily>
+                                        <FontSize>9pt</FontSize>
+                                        <FontWeight>Bold</FontWeight>
+                                      </Style>
+                                    </TextRun>
+                                  </TextRuns>
+                                  <Style>
+                                    <TextAlign>Center</TextAlign>
+                                  </Style>
+                                </Paragraph>
+                              </Paragraphs>
+                              <rd:DefaultName>Textbox61</rd:DefaultName>
+                              <Style>
+                                <Border>
+                                  <Style>Solid</Style>
+                                </Border>
+                                <BackgroundColor>#e6e6e6</BackgroundColor>
+                                <VerticalAlign>Middle</VerticalAlign>
+                                <PaddingLeft>2pt</PaddingLeft>
+                                <PaddingRight>2pt</PaddingRight>
+                                <PaddingTop>2pt</PaddingTop>
+                                <PaddingBottom>2pt</PaddingBottom>
+                              </Style>
+                            </Textbox>
+                          </CellContents>
+                        </TablixCell>
+                      </TablixCells>
+                    </TablixRow>
+                    <TablixRow>
+                      <Height>0.225in</Height>
+                      <TablixCells>
+                        <TablixCell>
+                          <CellContents>
+                            <Textbox Name="Textbox62">
+                              <CanGrow>true</CanGrow>
+                              <KeepTogether>true</KeepTogether>
+                              <Paragraphs>
+                                <Paragraph>
+                                  <TextRuns>
+                                    <TextRun>
+                                      <Label>[violation_count]</Label>
+                                      <Value>=Sum(Fields!violation_count.Value, "top_block")</Value>
+                                      <Style>
+                                        <FontFamily>Arial</FontFamily>
+                                        <FontSize>9pt</FontSize>
+                                      </Style>
+                                    </TextRun>
+                                  </TextRuns>
+                                  <Style>
+                                    <TextAlign>Center</TextAlign>
+                                  </Style>
+                                </Paragraph>
+                              </Paragraphs>
+                              <rd:DefaultName>Textbox62</rd:DefaultName>
+                              <Style>
+                                <Border>
+                                  <Style>Solid</Style>
+                                </Border>
+                                <VerticalAlign>Middle</VerticalAlign>
+                                <PaddingLeft>2pt</PaddingLeft>
+                                <PaddingRight>2pt</PaddingRight>
+                                <PaddingTop>2pt</PaddingTop>
+                                <PaddingBottom>2pt</PaddingBottom>
+                              </Style>
+                            </Textbox>
+                          </CellContents>
+                        </TablixCell>
+                        <TablixCell>
+                          <CellContents>
+                            <Textbox Name="Textbox63">
+                              <CanGrow>true</CanGrow>
+                              <KeepTogether>true</KeepTogether>
+                              <Paragraphs>
+                                <Paragraph>
+                                  <TextRuns>
+                                    <TextRun>
+                                      <Label>[major_violation_count]</Label>
+                                      <Value>=First(Fields!major_violation_count.Value, "top_block")</Value>
+                                      <Style>
+                                        <FontFamily>Arial</FontFamily>
+                                        <FontSize>9pt</FontSize>
+                                      </Style>
+                                    </TextRun>
+                                  </TextRuns>
+                                  <Style>
+                                    <TextAlign>Center</TextAlign>
+                                  </Style>
+                                </Paragraph>
+                              </Paragraphs>
+                              <rd:DefaultName>Textbox63</rd:DefaultName>
+                              <Style>
+                                <Border>
+                                  <Style>Solid</Style>
+                                </Border>
+                                <VerticalAlign>Middle</VerticalAlign>
+                                <PaddingLeft>2pt</PaddingLeft>
+                                <PaddingRight>2pt</PaddingRight>
+                                <PaddingTop>2pt</PaddingTop>
+                                <PaddingBottom>2pt</PaddingBottom>
+                              </Style>
+                            </Textbox>
+                          </CellContents>
+                        </TablixCell>
+                      </TablixCells>
+                    </TablixRow>
+                    <TablixRow>
+                      <Height>0.225in</Height>
+                      <TablixCells>
+                        <TablixCell>
+                          <CellContents>
+                            <Textbox Name="Textbox72">
+                              <CanGrow>true</CanGrow>
+                              <KeepTogether>true</KeepTogether>
+                              <Paragraphs>
+                                <Paragraph>
+                                  <TextRuns>
+                                    <TextRun>
+                                      <Value>Repeat</Value>
+                                      <Style>
+                                        <FontFamily>Arial</FontFamily>
+                                        <FontSize>9pt</FontSize>
+                                        <FontWeight>Bold</FontWeight>
+                                      </Style>
+                                    </TextRun>
+                                  </TextRuns>
+                                  <Style>
+                                    <TextAlign>Center</TextAlign>
+                                  </Style>
+                                </Paragraph>
+                              </Paragraphs>
+                              <rd:DefaultName>Textbox72</rd:DefaultName>
+                              <Style>
+                                <Border>
+                                  <Style>Solid</Style>
+                                </Border>
+                                <BackgroundColor>#e6e6e6</BackgroundColor>
+                                <VerticalAlign>Middle</VerticalAlign>
+                                <PaddingLeft>2pt</PaddingLeft>
+                                <PaddingRight>2pt</PaddingRight>
+                              </Style>
+                            </Textbox>
+                          </CellContents>
+                        </TablixCell>
+                        <TablixCell>
+                          <CellContents>
+                            <Textbox Name="Textbox73">
+                              <CanGrow>true</CanGrow>
+                              <KeepTogether>true</KeepTogether>
+                              <Paragraphs>
+                                <Paragraph>
+                                  <TextRuns>
+                                    <TextRun>
+                                      <Value>Corrected</Value>
+                                      <Style>
+                                        <FontFamily>Arial</FontFamily>
+                                        <FontSize>9pt</FontSize>
+                                        <FontWeight>Bold</FontWeight>
+                                      </Style>
+                                    </TextRun>
+                                  </TextRuns>
+                                  <Style>
+                                    <TextAlign>Center</TextAlign>
+                                  </Style>
+                                </Paragraph>
+                              </Paragraphs>
+                              <rd:DefaultName>Textbox73</rd:DefaultName>
+                              <Style>
+                                <Border>
+                                  <Style>Solid</Style>
+                                </Border>
+                                <BackgroundColor>#e6e6e6</BackgroundColor>
+                                <VerticalAlign>Middle</VerticalAlign>
+                                <PaddingLeft>2pt</PaddingLeft>
+                                <PaddingRight>2pt</PaddingRight>
+                                <PaddingTop>2pt</PaddingTop>
+                                <PaddingBottom>2pt</PaddingBottom>
+                              </Style>
+                            </Textbox>
+                          </CellContents>
+                        </TablixCell>
+                      </TablixCells>
+                    </TablixRow>
+                    <TablixRow>
+                      <Height>0.225in</Height>
+                      <TablixCells>
+                        <TablixCell>
+                          <CellContents>
+                            <Textbox Name="Textbox74">
+                              <CanGrow>true</CanGrow>
+                              <KeepTogether>true</KeepTogether>
+                              <Paragraphs>
+                                <Paragraph>
+                                  <TextRuns>
+                                    <TextRun>
+                                      <Label>[repeat_violation_count]</Label>
+                                      <Value>=first(Fields!repeat_violation_count.Value,"top_block")</Value>
+                                      <Style>
+                                        <FontFamily>Arial</FontFamily>
+                                        <FontSize>9pt</FontSize>
+                                      </Style>
+                                    </TextRun>
+                                  </TextRuns>
+                                  <Style>
+                                    <TextAlign>Center</TextAlign>
+                                  </Style>
+                                </Paragraph>
+                              </Paragraphs>
+                              <rd:DefaultName>Textbox74</rd:DefaultName>
+                              <Style>
+                                <Border>
+                                  <Style>Solid</Style>
+                                </Border>
+                                <VerticalAlign>Middle</VerticalAlign>
+                                <PaddingLeft>2pt</PaddingLeft>
+                                <PaddingRight>2pt</PaddingRight>
+                              </Style>
+                            </Textbox>
+                          </CellContents>
+                        </TablixCell>
+                        <TablixCell>
+                          <CellContents>
+                            <Textbox Name="Textbox75">
+                              <CanGrow>true</CanGrow>
+                              <KeepTogether>true</KeepTogether>
+                              <Paragraphs>
+                                <Paragraph>
+                                  <TextRuns>
+                                    <TextRun>
+                                      <Label>[cos_violation_count]</Label>
+                                      <Value>=first(Fields!cos_violation_count.Value,"top_block")</Value>
+                                      <Style>
+                                        <FontFamily>Arial</FontFamily>
+                                        <FontSize>9pt</FontSize>
+                                      </Style>
+                                    </TextRun>
+                                  </TextRuns>
+                                  <Style>
+                                    <TextAlign>Center</TextAlign>
+                                  </Style>
+                                </Paragraph>
+                              </Paragraphs>
+                              <rd:DefaultName>Textbox75</rd:DefaultName>
+                              <Style>
+                                <Border>
+                                  <Style>Solid</Style>
+                                </Border>
+                                <VerticalAlign>Middle</VerticalAlign>
+                                <PaddingLeft>2pt</PaddingLeft>
+                                <PaddingRight>2pt</PaddingRight>
+                                <PaddingTop>2pt</PaddingTop>
+                                <PaddingBottom>2pt</PaddingBottom>
+                              </Style>
+                            </Textbox>
+                          </CellContents>
+                        </TablixCell>
+                      </TablixCells>
+                    </TablixRow>
+                  </TablixRows>
+                </TablixBody>
+                <TablixColumnHierarchy>
+                  <TablixMembers>
+                    <TablixMember />
+                    <TablixMember />
+                  </TablixMembers>
+                </TablixColumnHierarchy>
+                <TablixRowHierarchy>
+                  <TablixMembers>
+                    <TablixMember />
+                    <TablixMember />
+                    <TablixMember />
+                    <TablixMember />
+                    <TablixMember />
+                  </TablixMembers>
+                </TablixRowHierarchy>
+                <DataSetName>logo</DataSetName>
+                <Top>0.26612in</Top>
+                <Left>5.19308in</Left>
+                <Height>1.35in</Height>
+                <Width>2.29692in</Width>
+                <ZIndex>8</ZIndex>
+                <Style>
+                  <Border>
+                    <Style>None</Style>
+                  </Border>
+                </Style>
+              </Tablix>
+            </ReportItems>
+            <KeepTogether>true</KeepTogether>
+            <Top>1.11833in</Top>
+            <Height>4.37442in</Height>
+            <Width>7.49001in</Width>
+            <ZIndex>3</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Rectangle>
+        </ReportItems>
+        <Height>5.49275in</Height>
+        <Style>
+          <Border>
+            <Style>None</Style>
+          </Border>
+        </Style>
+      </Body>
+      <Width>7.5in</Width>
+      <Page>
+        <PageHeader>
+          <Height>0.19444in</Height>
+          <PrintOnFirstPage>true</PrintOnFirstPage>
+          <PrintOnLastPage>true</PrintOnLastPage>
+          <ReportItems>
+            <Textbox Name="PageNumber">
+              <CanGrow>true</CanGrow>
+              <KeepTogether>true</KeepTogether>
+              <Paragraphs>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>Page </Value>
+                      <Style>
+                        <FontFamily>Arial</FontFamily>
+                        <FontSize>8pt</FontSize>
+                      </Style>
+                    </TextRun>
+                    <TextRun>
+                      <Value>=Globals!PageNumber</Value>
+                      <Style>
+                        <FontFamily>Arial</FontFamily>
+                        <FontSize>8pt</FontSize>
+                      </Style>
+                    </TextRun>
+                    <TextRun>
+                      <Value> of </Value>
+                      <Style>
+                        <FontFamily>Arial</FontFamily>
+                        <FontSize>8pt</FontSize>
+                      </Style>
+                    </TextRun>
+                    <TextRun>
+                      <Value>=Globals!TotalPages</Value>
+                      <Style>
+                        <FontFamily>Arial</FontFamily>
+                        <FontSize>8pt</FontSize>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style>
+                    <TextAlign>Right</TextAlign>
+                  </Style>
+                </Paragraph>
+              </Paragraphs>
+              <rd:DefaultName>PageNumber</rd:DefaultName>
+              <Height>0.19444in</Height>
+              <Width>7.49in</Width>
+              <Visibility>
+                <Hidden>=IIf(Globals!PageNumber =1, True, False)</Hidden>
+              </Visibility>
+              <Style>
+                <Border>
+                  <Style>None</Style>
+                </Border>
+                <PaddingLeft>2pt</PaddingLeft>
+                <PaddingRight>2pt</PaddingRight>
+                <PaddingTop>2pt</PaddingTop>
+                <PaddingBottom>2pt</PaddingBottom>
+              </Style>
+            </Textbox>
+          </ReportItems>
+          <Style>
+            <Border>
+              <Style>None</Style>
+            </Border>
+          </Style>
+        </PageHeader>
+        <PageFooter>
+          <Height>0.62404in</Height>
+          <PrintOnFirstPage>true</PrintOnFirstPage>
+          <PrintOnLastPage>true</PrintOnLastPage>
+          <ReportItems>
+            <Textbox Name="Textbox48">
+              <CanGrow>true</CanGrow>
+              <KeepTogether>true</KeepTogether>
+              <Paragraphs>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>Healthy Choices. Healthy People. Healthy Communities. </Value>
+                      <Style>
+                        <FontFamily>Arial</FontFamily>
+                        <FontSize>14pt</FontSize>
+                        <Color>White</Color>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style>
+                    <TextAlign>Center</TextAlign>
+                  </Style>
+                </Paragraph>
+              </Paragraphs>
+              <rd:DefaultName>Textbox48</rd:DefaultName>
+              <Top>0.33333in</Top>
+              <Height>0.29071in</Height>
+              <Width>7.49in</Width>
+              <Visibility>
+                <Hidden>=IIf(Globals!PageNumber = 1, False, True)</Hidden>
+              </Visibility>
+              <Style>
+                <Border>
+                  <Style>None</Style>
+                </Border>
+                <BackgroundColor>#54c14a</BackgroundColor>
+                <PaddingLeft>2pt</PaddingLeft>
+                <PaddingRight>2pt</PaddingRight>
+                <PaddingTop>2pt</PaddingTop>
+                <PaddingBottom>2pt</PaddingBottom>
+              </Style>
+            </Textbox>
+            <Textbox Name="Textbox84">
+              <CanGrow>true</CanGrow>
+              <CanShrink>true</CanShrink>
+              <KeepTogether>true</KeepTogether>
+              <Paragraphs>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>Inspection Report Received Electronically by: </Value>
+                      <Style>
+                        <FontStyle>Normal</FontStyle>
+                        <FontFamily>Arial</FontFamily>
+                        <FontSize>8pt</FontSize>
+                        <FontWeight>Normal</FontWeight>
+                        <TextDecoration>None</TextDecoration>
+                        <Color>#000000</Color>
+                      </Style>
+                    </TextRun>
+                    <TextRun>
+                      <Label>[recevied_by]</Label>
+                      <Value>=First(Fields!recevied_by.Value,"top_block")</Value>
+                      <Style>
+                        <FontStyle>Normal</FontStyle>
+                        <FontFamily>Arial</FontFamily>
+                        <FontSize>8pt</FontSize>
+                        <FontWeight>Normal</FontWeight>
+                        <TextDecoration>None</TextDecoration>
+                        <Color>#000000</Color>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style />
+                </Paragraph>
+                <Paragraph>
+                  <TextRuns>
+                    <TextRun>
+                      <Value>Inspected By: </Value>
+                      <Style>
+                        <FontStyle>Normal</FontStyle>
+                        <FontFamily>Arial</FontFamily>
+                        <FontSize>8pt</FontSize>
+                        <FontWeight>Normal</FontWeight>
+                        <TextDecoration>None</TextDecoration>
+                        <Color>#000000</Color>
+                      </Style>
+                    </TextRun>
+                    <TextRun>
+                      <Label>[inspector_name]</Label>
+                      <Value>=First(Fields!inspector_name.Value,"top_block")</Value>
+                      <Style>
+                        <FontStyle>Normal</FontStyle>
+                        <FontFamily>Arial</FontFamily>
+                        <FontSize>8pt</FontSize>
+                        <FontWeight>Normal</FontWeight>
+                        <TextDecoration>None</TextDecoration>
+                        <Color>#000000</Color>
+                      </Style>
+                    </TextRun>
+                  </TextRuns>
+                  <Style />
+                </Paragraph>
+              </Paragraphs>
+              <rd:DefaultName>Textbox84</rd:DefaultName>
+              <Height>0.33333in</Height>
+              <Width>7.49in</Width>
+              <ZIndex>1</ZIndex>
+              <Visibility>
+                <Hidden>=iif(Globals!PageNumber=Globals!TotalPages,False,True)</Hidden>
+              </Visibility>
+              <Style>
+                <Border>
+                  <Style>None</Style>
+                </Border>
+                <PaddingLeft>2pt</PaddingLeft>
+                <PaddingRight>2pt</PaddingRight>
+                <PaddingTop>2pt</PaddingTop>
+                <PaddingBottom>2pt</PaddingBottom>
+              </Style>
+            </Textbox>
+          </ReportItems>
+          <Style>
+            <Border>
+              <Style>None</Style>
+            </Border>
+          </Style>
+        </PageFooter>
+        <LeftMargin>0.5in</LeftMargin>
+        <RightMargin>0.5in</RightMargin>
+        <TopMargin>0.5in</TopMargin>
+        <BottomMargin>0.5in</BottomMargin>
+        <Style>
+          <Border>
+            <Style>None</Style>
+          </Border>
+        </Style>
+      </Page>
+    </ReportSection>
+  </ReportSections>
+  <ReportParameters>
+    <ReportParameter Name="inspection_id">
+      <DataType>String</DataType>
+      <Prompt>inspection id</Prompt>
+    </ReportParameter>
+  </ReportParameters>
+  <ReportParametersLayout>
+    <GridLayoutDefinition>
+      <NumberOfColumns>4</NumberOfColumns>
+      <NumberOfRows>2</NumberOfRows>
+      <CellDefinitions>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>0</RowIndex>
+          <ParameterName>inspection_id</ParameterName>
+        </CellDefinition>
+      </CellDefinitions>
+    </GridLayoutDefinition>
+  </ReportParametersLayout>
+  <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
+  <rd:ReportUnitType>Inch</rd:ReportUnitType>
+  <rd:ReportID>6a2a7d59-a680-414e-8728-1ce4ef016c87</rd:ReportID>
+</Report>
